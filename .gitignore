@@ -1,0 +1,12 @@
+.claude/
+.env
+.env.*
+!.env.example
+node_modules/
+app/infantil/aulas/**/previas/
+app/infantil/aulas/**/respostas/
+*.backup
+*.bak
+
+# Notas internas de coordenação entre as IAs (caminhos locais)
+PROMPT_REPASSE_CLAUDE.md

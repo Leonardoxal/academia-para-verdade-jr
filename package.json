@@ -1,0 +1,8 @@
+{
+  "name": "academia-para-verdade-jr",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  }
+}
