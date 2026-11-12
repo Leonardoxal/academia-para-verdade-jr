@@ -18,6 +18,7 @@ import { ETAPAS_INFANTIS, etapaDaIdade } from '../infantil/etapas.js';
 import { OBSERVACOES, textoParaIA, textoReforcoIA } from '../infantil/prompt.js';
 import { JOGOS } from '../infantil/jogos.js';
 import { AREAS, SITUACOES, ORIGENS, situacaoAtual, proximosPassos } from '../infantil/registro.js';
+import { TRILHAS, HABILIDADES, ESTADOS, habilidadeDoTexto, habilidadePorId, mapaDaTrilha, proximasHabilidades, trilhasDaIdade } from '../infantil/habilidades.js';
 
 const MAX_BYTES = 25 * 1024 * 1024;
 const MAX_LADO = 1800;
@@ -221,11 +222,12 @@ export function aulaInfantil(ctx, id) {
     <div class="inf-acoes"><button class="btn primario" type="button" id="inf-ia-gerar">Montar o texto</button><button class="btn" type="button" id="inf-ia-copiar" hidden>Copiar o texto</button></div>
     <label class="campo largo" id="inf-ia-caixa" hidden><span>Texto para a IA (pode editar antes de copiar)</span><textarea id="inf-ia-texto" rows="14"></textarea></label>
     <h2>Registrar o que foi confirmado</h2>
-    <p class="meta">Só depois de conferir. Registre uma habilidade por vez, para o filho escolhido em "Quem fez esta aula?". A situação de cada habilidade é sempre o registro mais recente dela; uma atividade isolada não prova domínio.</p>
+    <p class="meta">Só depois de conferir. Registre uma habilidade por vez, para o filho escolhido em "Quem fez esta aula?". A situação de cada habilidade é sempre o registro mais recente dela; uma atividade isolada não prova domínio. As habilidades do mapa (as sugestões do campo) entram no acompanhamento da trilha; no mapa, "dominado" só vale depois de visto em dois dias diferentes ou numa nova verificação.</p>
     <form class="inf-caixa inf-registro" id="inf-registro">
       <div class="inf-filho-campos">
         <label class="campo"><span>Área</span><select name="area" required><option value="">Escolha</option>${opcoes(Object.fromEntries(AREAS.map((a) => [a, a])))}</select></label>
-        <label class="campo"><span>Habilidade</span><input name="habilidade" maxlength="160" required placeholder="Ex.: contar até 3 objetos"></label>
+        <label class="campo"><span>Habilidade</span><input name="habilidade" maxlength="160" required list="inf-hab-lista" placeholder="Escolha do mapa ou escreva outra">
+          <datalist id="inf-hab-lista">${HABILIDADES.map((h) => `<option value="${esc(h.nome)}">${esc(TRILHAS[h.trilha].nome)}</option>`).join('')}</datalist></label>
         <label class="campo"><span>Situação</span><select name="situacao" required><option value="">Escolha</option>${opcoes(SITUACOES)}</select></label>
         <label class="campo"><span>De onde vem</span><select name="origem" required>${opcoes(ORIGENS)}</select></label>
         <label class="campo"><span>Reavaliar em</span><input name="reavaliar" type="date"></label>
@@ -400,7 +402,35 @@ async function completarProximas(root, filhos) {
   }
 }
 
-/** Por filho: próximos passos (reavaliar ou reforçar) e a situação atual de cada habilidade registrada. */
+/** Uma habilidade do mapa, com o que fazer: verificar em casa, critério de domínio, o que tentar e o jogo ligado. */
+const passoDoMapa = (l) => {
+  const h = l.habilidade;
+  const j = h.jogo && JOGOS[h.jogo];
+  return `<li class="inf-passo"><strong>${esc(h.nome)}</strong> <span class="meta">(${esc(ESTADOS[l.estado])}${l.liberada ? '' : `; ainda falta: ${l.faltam.map((p) => esc(habilidadePorId(p).nome)).join('; ')}`})</span>
+    <br><span class="meta">Objetivo:</span> ${esc(h.objetivo)}
+    <br><span class="meta">Como verificar em 2 minutos:</span> ${esc(h.verificar)}
+    <br><span class="meta">Há domínio quando:</span> ${esc(h.dominio)}
+    ${l.estado === 'a-confirmar' ? '<br><span class="meta">Já foi vista uma vez. Repita a verificação em outro dia e registre de novo antes de avançar.</span>' : `<br><span class="meta">Se ainda não consegue:</span> ${esc(h.intervencao)}`}
+    ${j ? `<br>${link(`jogo-${h.jogo}`, `Jogo que treina isto: ${j.titulo}`)}` : ''}</li>`;
+};
+
+/** Trilhas do mapa para um filho: o que fazer agora (no máximo 3) e o mapa inteiro com o estado de cada habilidade. */
+function blocoDoMapa(f, regs) {
+  return trilhasDaIdade(anosCompletos(f.nascimento)).map((id) => {
+    const t = TRILHAS[id];
+    const mapa = mapaDaTrilha(id, regs);
+    const agora = proximasHabilidades(id, regs);
+    const dominadas = mapa.filter((l) => l.estado === 'dominada').length;
+    return `<details class="inf-caixa" open><summary><strong>${esc(t.nome)}: ${esc(f.nome)}</strong> <span class="meta">(${dominadas} de ${mapa.length} dominadas)</span></summary>
+      <p class="meta">${esc(t.finalidade)} As idades são referência: o que libera uma habilidade é o domínio das anteriores. Observe na brincadeira, sem clima de prova, e registre na página da aula.</p>
+      ${agora.length ? `<h3>O que fazer agora</h3><ul class="inf-passos">${agora.map(passoDoMapa).join('')}</ul>` : '<p>Trilha concluída. Mantenha as habilidades vivas na rotina.</p>'}
+      <details><summary>Ver o mapa inteiro</summary><table class="inf-tabela"><tr><th>Habilidade</th><th>Idade de referência</th><th>Depende de</th><th>Situação</th></tr>
+      ${mapa.map((l) => `<tr><td>${esc(l.habilidade.nome)}</td><td>${l.habilidade.de} a ${l.habilidade.ate} anos</td><td>${l.habilidade.prereq.map((p) => esc(habilidadePorId(p).nome)).join('; ') || '—'}</td><td>${esc(ESTADOS[l.estado])}</td></tr>`).join('')}</table>
+      <p class="meta">Sequência adaptada de Gelman e Gallistel (1978) e de Clements e Sarama (2009). A forma usada aqui é proposta da Academia e ainda não foi revista por especialista.</p></details></details>`;
+  }).join('');
+}
+
+/** Por filho: o mapa da trilha, os próximos passos (reavaliar ou reforçar) e a situação atual de cada habilidade registrada. */
 async function desenharHabilidades(root, filhos) {
   const alvo = root.querySelector('#inf-habilidades');
   const hoje = new Date().toLocaleDateString('sv'); // AAAA-MM-DD no fuso do aparelho
@@ -408,6 +438,7 @@ async function desenharHabilidades(root, filhos) {
   for (const f of filhos) {
     let regs = [];
     try { regs = await arm.listarRegistros(f.id); } catch { continue; }
+    blocos.push(blocoDoMapa(f, regs));
     if (!regs.length) continue;
     const passos = proximosPassos(regs, hoje);
     blocos.push(`<details class="inf-caixa"${passos.length ? ' open' : ''}><summary><strong>Habilidades: ${esc(f.nome)}</strong> <span class="meta">(${situacaoAtual(regs).length} habilidade(s) registrada(s))</span></summary>
@@ -742,6 +773,10 @@ aulaInfantil.ligar = (root, ctx, id) => {
     const b = ev.target.closest('[data-apagar]');
     if (!b || !confirm('Apagar este registro? Não dá para desfazer.')) return;
     try { await arm.apagarRegistro(filhoReg(), b.dataset.apagar); await mostrarRegistros(); } catch (e) { toast(erroTexto(e)); }
+  });
+  formReg.elements.habilidade.addEventListener('change', (ev) => {
+    const h = habilidadeDoTexto(ev.target.value);
+    if (h) formReg.elements.area.value = TRILHAS[h.trilha].area; // habilidade do mapa: a área é a da trilha
   });
   seletor.addEventListener('change', mostrarRegistros);
   iniciando.then(mostrarRegistros);

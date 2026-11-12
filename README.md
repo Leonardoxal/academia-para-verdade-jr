@@ -33,6 +33,18 @@ O site usa a mesma origem `https://leonardoxal.github.io` e o mesmo Supabase da 
 - `app/tests/infantil.test.mjs`: testes da experiência infantil, armazenamento e conteúdo.
 - `.github/workflows/pages.yml`: publicação estática com testes prévios.
 
+## Estado, plano e padrões
+
+O estado dos dois projetos, o plano, os padrões pedagógicos e a arquitetura ficam no repositório da Academia da Verdade (`Leonardoxal/leonardoxal.github.io`): `PROJECT_STATUS.md`, `ROADMAP.md`, `PEDAGOGICAL_STANDARDS.md` e `ARCHITECTURE.md`. Leia-os antes de começar uma sessão de trabalho.
+
+## Mapa de habilidades
+
+`app/infantil/habilidades.js` traz a sequência de habilidades com pré-requisitos, verificação em casa, critério de domínio e o que tentar quando a criança ainda não consegue. Hoje há uma trilha: Número e quantidade, de 2 a 6 anos. O painel dos pais mostra "O que fazer agora" (no máximo três habilidades por vez).
+
+- O registro liga-se ao mapa pelo nome da habilidade; o formulário de registro sugere os nomes. O banco não mudou.
+- Uma habilidade só conta como dominada quando foi vista assim em dois dias diferentes ou numa nova verificação.
+- Não acrescente trilhas para fazer volume. A próxima só entra depois de esta ser usada e revista.
+
 ## Relatórios de etapas
 
 Os relatórios de implementação ficam em [`RELATORIOS_ETAPAS.md`](RELATORIOS_ETAPAS.md). A remoção da seção infantil da Academia da Verdade não faz parte deste repositório e só poderá ocorrer depois da aprovação do responsável e do desenvolvedor superior.
