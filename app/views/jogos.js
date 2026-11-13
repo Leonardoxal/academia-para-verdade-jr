@@ -139,8 +139,9 @@ const capa = (id) => `<svg class="jg-capa" viewBox="0 0 160 236" aria-hidden="tr
 
 export function jogos() {
   return `<section class="infantil jogos">
+    <p class="migalha">${link('infantil', '← Voltar ao mapa')}</p>
     <header class="cab jg-cab">
-      <h1>Jogos da Academia</h1>
+      <h1>Campo dos Jogos</h1>
       <p class="sub">Janelas de vidro colorido, dos 2 aos 15 anos. Cada acerto acende a luz; três acertos seguidos sobem um nível, e os níveis não acabam. A idade de cada jogo é indicação; o nível acompanha o que a criança mostra.</p>
     </header>
     <div class="jg-janelas">${Object.values(JOGOS).map((j) => `<a class="jg-janela jg-tema-${j.id}" href="#jogo-${j.id}">

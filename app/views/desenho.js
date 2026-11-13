@@ -13,7 +13,7 @@ export const IDEIAS = [
 
 export function desenhar() {
   return `<section class="infantil jogos jg-desenho">
-    <div class="jg-barra"><a class="btn pequeno" href="#jogos">Voltar aos jogos</a><span class="jg-titulo">Desenho livre</span></div>
+    <div class="jg-barra"><a class="btn pequeno" href="#infantil">Voltar ao mapa</a><span class="jg-titulo">Oficina do Iluminador</span></div>
     <p class="jg-cena" id="dz-ideia" aria-live="polite">${IDEIAS[0]}</p>
     <div class="dz-ferr" role="toolbar" aria-label="Ferramentas de desenho">
       ${CORES.map((c, i) => `<button type="button" class="dz-cor${i === 0 ? ' ativa' : ''}" data-cor="${c}" style="background:${c}" aria-label="Cor ${i + 1}${c === '#ffffff' ? ' (branco, serve de borracha)' : ''}" aria-pressed="${i === 0}"></button>`).join('')}

@@ -1,0 +1,144 @@
+.jg-historico { margin-top: 12px; }
+.jg-historico .inf-tabela { font-size: .92rem; }
+.jg-obs { width: 100%; min-width: 12em; font: inherit; padding: 4px 6px; border: 1px solid var(--linha); border-radius: 6px; background: var(--superficie); color: var(--tinta); }
+.jg-obs.salvo { border-color: var(--ouro); }
+.jg-fora { padding-left: 1.2em; }
+.jg-fora li { margin: .5em 0; }
+@media (max-width: 560px) { .jg-historico { overflow-x: auto; } }
+/* Aba Jogos: vitral à noite. O painel é chumbo escuro nos dois temas; as peças são vidro de cor que acende no acerto. */
+.jogos { --jg-chumbo: #141925; --jg-chumbo-2: #222a3b; --jg-luz: #fff4cf; --jg-ouro: #e2c46f;
+  --jg-rubi: #c8243f; --jg-safira: #2a62b8; --jg-esmeralda: #1f875a; --jg-ambar: #e6a32a; --jg-cor: var(--jg-safira); }
+.jg-tema-quantos { --jg-cor: var(--jg-rubi); } .jg-tema-depois { --jg-cor: var(--jg-safira); } .jg-tema-ouvir { --jg-cor: var(--jg-esmeralda); }
+.jg-tema-numeros { --jg-cor: var(--jg-ambar); } .jg-tema-palavras { --jg-cor: #7a3a8f; }
+.jg-tema-geografia { --jg-cor: #2a6f86; } .jg-tema-leitura { --jg-cor: #6a2a5a; } .jg-tema-silabas { --jg-cor: #8f5a2a; }
+.jg-tema-espanhol { --jg-cor: #a8541f; } .jg-tema-musica { --jg-cor: #5a3f8f; } .jg-tema-estrategia { --jg-cor: #3d5a3a; }
+.jg-tocar { font-size: 1.1rem; }
+.jg-tema-ciencias { --jg-cor: #1f7f86; } .jg-tema-virtudes { --jg-cor: #8f2f3a; } .jg-tema-tempo { --jg-cor: #6b5a2a; } .jg-tema-calculo { --jg-cor: #2f4a8f; }
+.jg-cab { text-align: center; }
+.jg-cab h1 { font-size: clamp(2.4rem, 7vw, 3.6rem); margin-bottom: .1em; }
+.jg-cab .sub { max-width: 34em; margin: 0 auto; }
+/* as janelas góticas: três por fileira, a última fileira centralizada */
+.jg-janelas { --jg-vao: clamp(12px, 3vw, 36px); display: flex; flex-wrap: wrap; justify-content: center; gap: var(--jg-vao); margin: 28px auto 32px; max-width: 900px; }
+.jg-janelas > .jg-janela { width: calc((100% - 2 * var(--jg-vao)) / 3); }
+.jg-janela { display: flex; flex-direction: column; align-items: center; gap: 10px; text-decoration: none; color: var(--tinta); border-radius: 90px 90px 16px 16px; padding: 6px 6px 12px; outline-offset: 6px; }
+.jg-janela:focus-visible { outline: 3px solid var(--ouro); }
+.jg-capa { width: 100%; max-width: 230px; height: auto; display: block; overflow: visible; }
+.jg-capa .vidro { fill: var(--jg-cor); }
+.jg-capa .tons .claro { fill: rgb(255 244 207 / .2); } .jg-capa .tons .escuro { fill: rgb(10 8 20 / .22); }
+.jg-capa .chumbo-fino { fill: none; stroke: var(--jg-chumbo); stroke-width: 4; stroke-linecap: round; }
+.jg-capa .medalhao { fill: rgb(255 244 207 / .22); stroke: var(--jg-chumbo); stroke-width: 5; }
+.jg-capa .chumbo { fill: none; stroke: var(--jg-chumbo); stroke-width: 8; stroke-linejoin: round; }
+.jg-capa .figura .a { fill: var(--jg-ambar); stroke: var(--jg-chumbo); stroke-width: 10; }
+.jg-capa .figura .b { fill: var(--jg-luz); stroke: var(--jg-chumbo); stroke-width: 10; }
+.jg-capa .figura .q { fill: var(--jg-luz); font: 900 34px var(--inf-texto); }
+.jg-capa .figura .onda { fill: none; stroke: var(--jg-luz); stroke-width: 5; stroke-linecap: round; }
+.jg-janela .jg-capa { filter: brightness(.82) saturate(.95) drop-shadow(0 8px 10px rgb(20 10 5 / .35)); transition: filter .25s ease, transform .25s ease; }
+.jg-janela:hover .jg-capa, .jg-janela:focus-visible .jg-capa { filter: brightness(1.12) saturate(1.1) drop-shadow(0 0 22px var(--jg-cor)); transform: translateY(-4px); }
+/* o único momento orquestrado: ao abrir a aba, as janelas acendem uma após a outra */
+.jg-janelas .jg-janela .jg-capa { animation: jg-acender 1.1s ease-out both; }
+.jg-janelas .jg-janela:nth-child(2) .jg-capa { animation-delay: .35s; }
+.jg-janelas .jg-janela:nth-child(3) .jg-capa { animation-delay: .7s; }
+.jg-janelas .jg-janela:nth-child(4) .jg-capa { animation-delay: 1.05s; }
+.jg-janelas .jg-janela:nth-child(5) .jg-capa { animation-delay: 1.4s; }
+@keyframes jg-acender { from { filter: brightness(.25) saturate(.4); } 60% { filter: brightness(1.25) saturate(1.2) drop-shadow(0 0 26px var(--jg-cor)); } to { filter: brightness(.82) saturate(.95) drop-shadow(0 8px 10px rgb(20 10 5 / .35)); } }
+.jg-janela-txt { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; }
+.jg-janela-txt strong { font: 400 clamp(1.3rem, 2.6vw, 1.7rem)/1.1 var(--inf-display); color: var(--vinho); }
+.jg-janela-txt > span { font-weight: 700; color: var(--tinta-2); font-size: .95rem; }
+.jg-janela-txt .jg-nivel-capa { margin-top: 4px; padding: 2px 12px; border-radius: 999px; background: var(--jg-chumbo); color: var(--jg-ouro); font-weight: 800; font-size: .85rem; }
+@media (max-width: 560px) {
+  .jg-janelas { gap: 18px; }
+  .jg-janelas > .jg-janela { width: 100%; }
+  .jg-janela { flex-direction: row; border-radius: 22px; padding: 8px; }
+  .jg-janela .jg-capa { width: 110px; flex: none; }
+  .jg-janela-txt { align-items: flex-start; text-align: left; }
+}
+/* para os pais */
+.jg-pais h2 { margin-top: .2em; }
+.jg-quem { border: 0; padding: 0; margin: 0 0 12px; }
+.jg-quem legend { font: 800 1rem var(--inf-texto); letter-spacing: 0; margin-bottom: 6px; }
+.jg-chips { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.jg-chip input { position: absolute; opacity: 0; pointer-events: none; }
+.jg-chip span { display: inline-flex; align-items: center; min-height: 48px; padding: 8px 20px; border-radius: 999px; border: 2px solid var(--ouro); font-weight: 800; cursor: pointer; background: var(--superficie); }
+.jg-chip input:checked + span { background: var(--jg-chumbo); color: var(--jg-ouro); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ouro) 40%, transparent); }
+.jg-chip input:focus-visible + span { outline: 3px solid var(--vinho); outline-offset: 2px; }
+.jg-limite { max-width: 280px; }
+/* a partida */
+.jg-barra { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 8px 0 14px; scroll-margin-top: 130px; }
+.jg-titulo { font: 400 clamp(1.4rem, 4vw, 1.9rem) var(--inf-display); color: var(--vinho); flex: 1 1 auto; }
+.jg-nivel { display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px; border-radius: 999px; background: var(--jg-chumbo); color: var(--jg-ouro); font-weight: 900; }
+.jg-luzes { display: inline-flex; gap: 5px; }
+.jg-luzes i { width: 12px; height: 12px; border-radius: 50%; background: #3a4357; box-shadow: inset 0 0 0 2px #0c0f16; }
+.jg-luzes i.acesa { background: var(--jg-ouro); box-shadow: 0 0 10px var(--jg-ouro); }
+.jg-nivel.subiu { animation: jg-subir .9s ease-out; }
+@keyframes jg-subir { 35% { transform: scale(1.25); box-shadow: 0 0 30px var(--jg-ouro); } }
+.jg-painel { position: relative; isolation: isolate; border-radius: 34px 34px 22px 22px; padding: clamp(16px, 3vw, 30px); min-height: 380px; color: var(--jg-luz);
+  background: radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--jg-cor) 45%, var(--jg-chumbo)), var(--jg-chumbo) 70%);
+  border: 6px solid var(--jg-chumbo); box-shadow: 0 0 0 3px var(--jg-ouro), 0 0 0 9px var(--jg-chumbo-2), 0 18px 40px -18px rgb(0 0 0 / .7); }
+.jg-painel.aceso { background: radial-gradient(130% 95% at 50% 10%, color-mix(in srgb, var(--jg-ouro) 55%, var(--jg-cor)), var(--jg-chumbo) 78%); }
+.jg-inicio { display: grid; justify-items: center; gap: 16px; text-align: center; padding: 10px 0; }
+.jg-inicio .jg-capa { width: 150px; filter: drop-shadow(0 0 24px var(--jg-cor)); }
+.jg-ajuda { max-width: 30em; margin: 0; color: color-mix(in srgb, var(--jg-luz) 82%, transparent); font-weight: 600; }
+.infantil .btn.jg-comecar { min-height: 64px; padding: 14px 44px; font-size: 1.35rem; }
+.jg-ouvir { position: absolute; top: 14px; right: 14px; width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--jg-ouro); background: var(--jg-chumbo-2); color: var(--jg-ouro); display: grid; place-items: center; cursor: pointer; }
+.jg-ouvir:focus-visible { outline: 3px solid var(--jg-luz); outline-offset: 3px; }
+.jg-pergunta { font: 900 clamp(1.4rem, 4.2vw, 2.1rem)/1.2 var(--inf-texto); text-align: center; margin: 6px 70px 18px; text-wrap: balance; }
+.jg-mostrar { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px; margin: 0 auto 22px; padding: 12px 18px; max-width: 720px; border-radius: 20px; background: rgb(255 244 207 / .07); border: 2px dashed color-mix(in srgb, var(--jg-ouro) 50%, transparent); }
+.jg-mais { font: 900 2.4rem var(--inf-texto); color: var(--jg-ouro); }
+.jg-conta { text-align: center; font: 900 clamp(2.4rem, 8vw, 3.6rem) var(--inf-texto); color: var(--jg-ouro); margin: 0 0 18px; }
+.jg-opcoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(140px, 42%), 1fr)); gap: clamp(10px, 2.4vw, 20px); max-width: 860px; margin: 0 auto; }
+.jg-opcoes.n2 { max-width: 560px; }
+.jg-opcoes.n6 { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 640px; } /* 3 + 3, nunca 5 + 1 */
+/* cada resposta é um vidro em arco: luz atrás, chumbo em volta, filete de ouro */
+.jg-vidro { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 170px; padding: 22px 10px 14px; cursor: pointer; color: var(--jg-luz); font: inherit;
+  border-radius: 70px 70px 14px 14px; border: 5px solid #0b0e15;
+  background: radial-gradient(90% 70% at 35% 22%, rgb(255 255 255 / .32), transparent 55%), radial-gradient(120% 100% at 50% 100%, color-mix(in srgb, var(--jg-cor) 70%, #000), var(--jg-cor));
+  box-shadow: 0 0 0 2px var(--jg-ouro), inset 0 -8px 18px rgb(0 0 0 / .25); transition: transform .15s ease, filter .2s ease; }
+.jg-vidro:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-3px); }
+.jg-vidro:focus-visible { outline: 4px solid var(--jg-luz); outline-offset: 4px; }
+.jg-vidro:disabled { cursor: default; }
+.jg-vidro.largo { min-height: 190px; }
+.jg-vidro.certa { z-index: 1; filter: brightness(1.35) saturate(1.2); box-shadow: 0 0 0 4px var(--jg-ouro), 0 0 46px 14px color-mix(in srgb, var(--jg-ouro) 70%, transparent); animation: jg-luz .9s ease-out; }
+.jg-vidro.certa::after { content: ""; position: absolute; inset: -30%; z-index: -1; border-radius: 50%; pointer-events: none; background: repeating-conic-gradient(from 0deg, rgb(255 236 170 / .55) 0 8deg, transparent 8deg 24deg); animation: jg-raios 1.2s ease-out forwards; }
+.jg-vidro.errada { filter: grayscale(.85) brightness(.6); }
+.jg-vidro.mostrar { animation: jg-mostrar 1s ease-in-out 2; box-shadow: 0 0 0 4px var(--jg-ouro), 0 0 24px 6px color-mix(in srgb, var(--jg-ouro) 60%, transparent); }
+@keyframes jg-luz { 40% { transform: scale(1.08); } }
+@keyframes jg-raios { from { opacity: 0; transform: scale(.6) rotate(0deg); } 30% { opacity: 1; } to { opacity: 0; transform: scale(1.25) rotate(40deg); } }
+@keyframes jg-mostrar { 50% { transform: scale(1.06); } }
+.jg-grupo { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 6px; font-size: clamp(1.7rem, 4.5vw, 2.3rem); line-height: 1.15; max-width: 260px; }
+.jg-grupo.denso { font-size: clamp(1.2rem, 3vw, 1.5rem); }
+.jg-grupo.poucos { font-size: clamp(2.4rem, 7vw, 3.4rem); gap: 4px 12px; }
+.jg-grupo .sai { position: relative; opacity: .4; filter: grayscale(1); }
+.jg-grupo .sai::after { content: "✕"; position: absolute; inset: 0; display: grid; place-items: center; color: #ff6b7f; font-weight: 900; }
+.jg-figura { font-size: clamp(3rem, 9vw, 4.2rem); line-height: 1; filter: drop-shadow(0 3px 2px rgb(0 0 0 / .35)); }
+.jg-num { font: 900 clamp(2.6rem, 8vw, 3.6rem)/1 var(--inf-texto); text-shadow: 0 3px 0 rgb(0 0 0 / .35); }
+.jg-pontos { color: var(--jg-ouro); letter-spacing: .12em; font-size: .9rem; max-width: 120px; text-align: center; word-break: break-all; }
+.jg-forma { width: 84px; height: 84px; overflow: visible; }
+.jg-forma > g > * { stroke: #0b0e15; stroke-width: 7; stroke-linejoin: round; }
+.jg-rubi > g > * { fill: #ff4d67; } .jg-safira > g > * { fill: #5b95ff; } .jg-esmeralda > g > * { fill: #3fd08a; } .jg-ambar > g > * { fill: #ffc744; }
+.jg-seq { gap: 10px; }
+/* no jogo das formas, o vidro das respostas é neutro: a cor da peça é a informação */
+.jg-tema-depois .jg-opcoes .jg-vidro { --jg-cor: #3b4868; }
+.jg-opcoes .jg-forma { width: 110px; height: 110px; }
+.jg-elo { display: grid; place-items: center; width: clamp(58px, 11vw, 78px); height: clamp(58px, 11vw, 78px); border-radius: 50%; background: rgb(255 244 207 / .12); border: 3px solid #0b0e15; box-shadow: 0 0 0 2px color-mix(in srgb, var(--jg-ouro) 60%, transparent); }
+.jg-elo .jg-forma { width: 80%; height: 80%; }
+.jg-elo .jg-num { font-size: clamp(1.6rem, 5vw, 2.2rem); }
+.jg-falta { font: 900 2.2rem var(--inf-texto); color: var(--jg-ouro); border-style: dashed; animation: jg-mostrar 1.6s ease-in-out infinite; }
+.jg-modelo { min-height: 0; cursor: default; padding: 12px 26px; }
+.jg-palavra { font-weight: 900; font-size: 1.3rem; }
+.jg-opcoes .jg-palavra { font-size: 1rem; }
+.jg-txt { font-weight: 800; font-size: clamp(1rem, 3vw, 1.25rem); line-height: 1.3; text-align: center; padding: 6px 4px; }
+.jg-cena { max-width: 36em; margin: 0 auto 14px; text-align: center; font-size: clamp(1.1rem, 3.2vw, 1.35rem); line-height: 1.45; color: var(--jg-luz); }
+.jg-legenda { text-align: center; min-height: 1.4em; margin-top: 12px; }
+/* descanso dos olhos (limite de tela) */
+.jg-descanso { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; background: rgb(10 12 20 / .86); }
+.jg-descanso[hidden] { display: none; }
+.jg-descanso-caixa { max-width: 460px; text-align: center; display: grid; gap: 14px; justify-items: center; background: var(--superficie); color: var(--tinta); border: 3px solid var(--ouro); border-radius: 28px; padding: 28px 22px; box-shadow: 0 0 0 8px var(--jg-chumbo); }
+.jg-descanso-caixa h2 { margin: 0; color: var(--vinho); }
+#jg-liberar { touch-action: none; user-select: none; -webkit-user-select: none; background-image: linear-gradient(var(--ouro-claro), var(--ouro-claro)); background-repeat: no-repeat; background-size: 0 100%; }
+#jg-liberar.segurando { animation: jg-segurar 3s linear forwards; }
+@keyframes jg-segurar { to { background-size: 100% 100%; } }
+@media (prefers-reduced-motion: reduce) {
+  .jogos *, .jogos *::after { animation: none !important; transition: none !important; }
+  .jg-janelas .jg-janela .jg-capa { filter: brightness(.9); }
+  #jg-liberar.segurando { background-size: 100% 100%; }
+}

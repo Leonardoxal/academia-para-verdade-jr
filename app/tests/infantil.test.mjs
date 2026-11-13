@@ -11,7 +11,7 @@ import { criarNuvem, criarArmazenamento } from '../infantil/armazenamento.js';
 import { idade, proximoCodigo } from '../infantil/idade.js';
 import { proximaPorFilho } from '../infantil/progresso.js';
 import { FAIXAS, SECOES, FORMATOS, LIVROS_INFANTIL, CATEQUESE, PAIS, livrosDaFaixa, faixaPara } from '../infantil/livros.js';
-import { infantil, aulaInfantil } from '../views/infantil.js';
+import { infantil, aulaInfantil, mosteiro } from '../views/infantil.js';
 import { JOGOS, PARES, GRUPOS, ajustar, progressoInicial, usadoHoje, acabou } from '../infantil/jogos.js';
 import { jogos, jogo } from '../views/jogos.js';
 import { rodadaQuantos, TEMAS, COISAS } from '../infantil/jogos.js';
@@ -141,8 +141,41 @@ test('infantil: as telas mostram as aulas, os PDFs e os campos de anexar', () =>
 test('infantil: leitor de PDF e recomendações aparecem nas telas', () => {
   const tela = aulaInfantil(null, AULAS_INFANTIL[0].data);
   for (const trecho of ['id="inf-ler"', 'id="inf-leitor-area"', 'id="inf-leitor-tela"', 'name="inf-doc"', 'name="inf-modo"', 'data-acao="tela-cheia"']) assert.ok(tela.includes(trecho), `falta ${trecho}`);
+  // Ordem da tela da aula: PDFs, anexar tarefas, aula feita; o que é do adulto vem depois.
+  const ordem = ['aula-objetos', 'Anexar tarefas', 'id="inf-feita"', 'aula-adulto'].map((t) => tela.indexOf(t));
+  assert.ok(ordem.every((p, i) => p >= 0 && (i === 0 || p > ordem[i - 1])), `ordem errada: ${ordem}`);
   const lista = infantil();
-  for (const trecho of ['id="inf-proximas"', 'Como usar a Academia para Verdade Jr.', 'A revisão da semana']) assert.ok(lista.includes(trecho), `falta ${trecho}`);
+  for (const trecho of ['id="inf-proximas"', 'Sala do Guia', 'Como fazer a aula', 'A revisão da semana']) assert.ok(lista.includes(trecho), `falta ${trecho}`);
+});
+
+test('clima: código do tempo vira um dos cinco climas; cidade arredondada; falha vira limpo; cache de 1 hora', async () => {
+  const { climaDoCodigo, arredondar, escolherCidade, climaDeHoje, CLIMAS } = await import('../infantil/clima.js');
+  assert.deepEqual([0, 1, 2, 3, 45, 61, 80, 95, 73].map((c) => climaDoCodigo(c)), ['limpo', 'limpo', 'nublado', 'nublado', 'neblina', 'chuva', 'chuva', 'chuva', 'nublado']);
+  assert.equal(climaDoCodigo(0, 35), 'vento');
+  assert.equal(climaDoCodigo(61, 50), 'chuva', 'chuva continua chuva mesmo com vento');
+  assert.ok(CLIMAS.includes(climaDoCodigo(999)));
+  assert.equal(arredondar(-23.5505), -23.6);
+  const guardado = new Map();
+  globalThis.localStorage = { getItem: (k) => guardado.get(k) ?? null, setItem: (k, v) => guardado.set(k, String(v)), removeItem: (k) => guardado.delete(k) };
+  assert.equal(await climaDeHoje(async () => { throw new Error('sem rede'); }), 'limpo', 'sem cidade');
+  const resposta = (corpo) => async () => ({ ok: true, json: async () => corpo });
+  await assert.rejects(() => escolherCidade('x'), /nome da cidade/);
+  await assert.rejects(() => escolherCidade('Lugar Nenhum', resposta({})), /não encontrada/);
+  const cidade = await escolherCidade('Campinas', resposta({ results: [{ name: 'Campinas', latitude: -22.9099, longitude: -47.0626 }] }));
+  assert.deepEqual(cidade, { nome: 'Campinas', lat: -22.9, lon: -47.1 }, 'só coordenadas arredondadas');
+  let chamadas = 0;
+  const previsao = async (url) => { chamadas++; assert.ok(url.includes('latitude=-22.9&longitude=-47.1')); return { ok: true, json: async () => ({ current: { weather_code: 63, wind_speed_10m: 5 } }) }; };
+  assert.equal(await climaDeHoje(previsao, 1000), 'chuva');
+  assert.equal(await climaDeHoje(previsao, 1000 + 59 * 60000), 'chuva');
+  assert.equal(chamadas, 1, 'a resposta vale por 1 hora');
+  assert.equal(await climaDeHoje(async () => { throw new Error('sem rede'); }, 1000 + 61 * 60000), 'limpo', 'falha vira limpo');
+  delete globalThis.localStorage;
+});
+
+test('mosteiro: a biblioteca tem tela própria e saiu da Sala do Guia', () => {
+  const m = mosteiro();
+  for (const trecho of ['Mosteiro dos Livros', 'id="inf-livros-filho"', 'data-livro=']) assert.ok(m.includes(trecho), `falta ${trecho}`);
+  assert.ok(!infantil().includes('id="inf-livros-filho"'));
 });
 
 test('livros: catálogo com campos, ids únicos (para o "Já lemos"), faixa e seção válidas; a aba mostra tudo', () => {
@@ -156,7 +189,7 @@ test('livros: catálogo com campos, ids únicos (para o "Já lemos"), faixa e se
   }
   for (const l of todos) for (const campo of ['titulo', 'autor']) assert.ok(String(l[campo] ?? '').trim(), `${l.id} sem ${campo}`);
   for (const f of FAIXAS) assert.ok(livrosDaFaixa(f.id).length > 0, `faixa vazia: ${f.id}`);
-  const lista = infantil();
+  const lista = mosteiro();
   for (const trecho of ['Biblioteca da família', 'id="inf-livros-filho"', 'data-livro="boa-noite-lua"', 'Sagrada Escritura', 'Catequese e formação religiosa', 'não verificados']) assert.ok(lista.includes(trecho), `falta ${trecho}`);
 });
 
@@ -805,4 +838,51 @@ test('mapa de habilidades: retenção — dominada há mais de um mês pede nova
   assert.equal(estadoDaHabilidade(h, revisto, depois + DIA).estado, 'dominada', 'verificada de novo, volta a dominada');
   assert.equal(estadoDaHabilidade(h, [...regs, reg(3, { habilidade: h.nome, situacao: 'revisar', criadoEm: depois })], depois + DIA).estado, 'em-andamento', 'se esqueceu, volta a ser trabalhada');
   for (const t of Object.values(TRILHAS)) { assert.ok(t.bncc.length && t.bncc.every(([c, texto]) => /^EI0[123][A-Z]{2}\d{2}$/.test(c) && texto.length > 20)); assert.ok(t.prepara.length > 20); }
+});
+
+// ---------------------------------------------------------------- Jornada (Porta da Casa, Mapa, Estrada das Aulas)
+import { REGIOES, regiaoDaIdade, trilhaDoFilho, marcosDaTrilha, viajantes, viajanteEscolhido } from '../infantil/jornada.js';
+
+const AULAS_J = [
+  { data: '2026-11-12', filho: 'f1', para: 'Filha 1', perfil: 'menina' },
+  { data: '2026-11-03', filho: 'f1', para: 'Filha 1', perfil: 'menina' },
+  { data: '2026-11-04-f2', filho: 'f2', para: 'Filho 2', perfil: 'menino' },
+  { data: '2026-11-04', filho: 'f1', para: 'Filha 1', perfil: 'menina' },
+];
+
+test('jornada: a região vem da idade, o bebê fica no colo e sem nascimento vale o Vale', () => {
+  assert.equal(regiaoDaIdade(null), 'vale');
+  assert.equal(regiaoDaIdade(0), 'colo');
+  assert.equal(regiaoDaIdade(1), 'colo');
+  assert.deepEqual([2, 3, 5, 6, 9, 10, 12, 13, 15, 16, 20].map(regiaoDaIdade), ['vale', 'vale', 'vale', 'floresta', 'floresta', 'montanhas', 'montanhas', 'estrada', 'estrada', 'estrada', 'estrada']);
+  assert.equal(REGIOES.length, 4);
+});
+
+test('jornada: a trilha de cada filho só tem as aulas dele, em ordem de caminhada', () => {
+  assert.deepEqual(trilhaDoFilho(AULAS_J, 'f1').map((a) => a.data), ['2026-11-03', '2026-11-04', '2026-11-12']);
+  assert.deepEqual(trilhaDoFilho(AULAS_J, 'f2').map((a) => a.data), ['2026-11-04-f2']);
+  assert.deepEqual(trilhaDoFilho(AULAS_J, 'f9'), []);
+});
+
+test('jornada: os marcos têm uma só próxima aula, a primeira ainda não feita; a marcação é por filho', () => {
+  const regs = [{ aula: '2026-11-03', filho: 'f1', feita: true }, { aula: '2026-11-04-f2', filho: 'f2', feita: true }, { aula: '2026-11-04', filho: 'f2', feita: true }];
+  const m = marcosDaTrilha(AULAS_J, regs, 'f1');
+  assert.deepEqual(m.map((x) => x.estado), ['feita', 'proxima', 'futura']);
+  assert.deepEqual(m.map((x) => x.numero), [1, 2, 3]);
+  assert.deepEqual(marcosDaTrilha(AULAS_J, regs, 'f2').map((x) => x.estado), ['feita']);
+  assert.equal(marcosDaTrilha(AULAS_J, [{ aula: '2026-11-03', filho: 'f1', feita: true }, { aula: '2026-11-04', filho: 'f1', feita: true }, { aula: '2026-11-12', filho: 'f1', feita: true }], 'f1').filter((x) => x.estado === 'proxima').length, 0);
+  // pular uma aula: a não feita continua sendo a próxima, mesmo havendo uma posterior feita
+  assert.deepEqual(marcosDaTrilha(AULAS_J, [{ aula: '2026-11-12', filho: 'f1', feita: true }], 'f1').map((x) => x.estado), ['proxima', 'futura', 'feita']);
+});
+
+test('jornada: quem viaja vem das aulas e do cadastro; o nome é do cadastro e a idade, do nascimento', () => {
+  const hoje = new Date('2026-11-13T12:00:00');
+  const sem = viajantes(AULAS_J, [], hoje);
+  assert.deepEqual(sem.map((v) => [v.id, v.nome, v.regiao]), [['f1', 'Filha 1', 'vale'], ['f2', 'Filho 2', 'vale']]);
+  const com = viajantes(AULAS_J, [{ id: 'f2', nome: 'Teste', nascimento: '2026-09-01' }, { id: 'f3', nome: 'Maior', nascimento: '2018-01-01', perfil: 'menino' }], hoje);
+  assert.deepEqual(com.map((v) => [v.id, v.nome, v.anos, v.regiao]), [['f1', 'Filha 1', null, 'vale'], ['f2', 'Teste', 0, 'colo'], ['f3', 'Maior', 8, 'floresta']]);
+  assert.equal(com[0].perfil, 'menina');
+  assert.equal(viajanteEscolhido(com, 'f3').id, 'f3');
+  assert.equal(viajanteEscolhido(com, 'f9'), null);
+  assert.equal(viajanteEscolhido(com, null), null);
 });

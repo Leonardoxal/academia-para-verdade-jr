@@ -1,0 +1,125 @@
+/* Porta da Casa e Mapa da Jornada (views/jornada.js). Usa os componentes de fundacao.css (.toque, .marco, .selo).
+   O dia é o tema claro e a noite é o tema escuro (app.js escolhe pelo horário no modo automático). */
+
+:root {
+  --j-ceu: #cfe3ee; --j-colina: #9bb67d; --j-pedra: #a79f92; --j-neve: #f4efe4; --j-arvore: #4f7a50; --j-estrada: #d8c28f;
+  --j-sol: #f2c14e; --j-lua: #f3e7b8;
+}
+:root[data-theme="dark"] {
+  --j-ceu: #16233a; --j-colina: #2f4a37; --j-pedra: #4a4d5a; --j-neve: #c9ccd8; --j-arvore: #1f3a2a; --j-estrada: #6d5d3a;
+}
+
+.jornada { max-width: 760px; margin: 0 auto; }
+.jornada h1 { font-family: "MedievalSharp", var(--f-titulo); font-weight: 400; color: var(--vinho); margin: 0; }
+.jornada h1::after { display: none; }
+
+/* ---- Porta da Casa ---- */
+.jn-porta { text-align: center; padding-block: var(--e5) var(--e6); }
+.jn-casa-grande { display: grid; place-items: center; margin-bottom: var(--e3); }
+.jn-casa-grande svg { width: 96px; height: auto; }
+.jn-porta h1 { font-size: clamp(1.9rem, 6vw, 2.6rem); margin-bottom: var(--e5); }
+.jn-viajantes { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--e4); }
+.jn-viajante { min-width: 132px; min-height: 160px; font-size: 1.05rem; }
+.jn-viajante svg { width: 56px; }
+.jn-rodape { display: flex; justify-content: center; margin-top: var(--e7); }
+
+/* Botão do responsável: pequeno, discreto, só abre depois de segurado por dois segundos. */
+.jn-guia {
+  position: relative; overflow: hidden; min-height: 44px; padding: var(--e2) var(--e4); border-radius: var(--raio-pilula);
+  border: 1px dashed var(--pedra); background: transparent; color: var(--tinta-2); font: 500 .85rem/1.2 var(--f-ui); cursor: pointer;
+  touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+.jn-guia:focus-visible { outline: 3px solid var(--azul); outline-offset: 3px; }
+.jn-guia-barra { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: var(--vinho); transform: scaleX(0); transform-origin: left; }
+.jn-guia.segurando .jn-guia-barra { animation: segurar 2s linear forwards; }
+@keyframes segurar { to { transform: scaleX(1); } }
+
+/* ---- Mapa ---- */
+.jn-barra { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--e3); align-items: center; margin-bottom: var(--e4); }
+.jn-casa { min-width: 72px; min-height: 72px; }
+.jn-quem h1 { font-size: clamp(1.5rem, 5vw, 2rem); overflow-wrap: anywhere; }
+.jn-quem p { margin: 0; }
+@media (max-width: 480px) { .jn-barra { grid-template-columns: auto minmax(0, 1fr); } .jn-barra .jn-guia { grid-column: 1 / -1; justify-self: end; } }
+
+.jn-continuar { display: flex; justify-content: center; text-align: center; width: 100%; margin: 0 0 var(--e4); }
+.jn-fim { margin-bottom: var(--e4); }
+.jn-continuar { align-items: center; gap: var(--e3); }
+.jn-cont-fig svg { display: block; width: 36px; height: auto; }
+
+.jn-cidade { display: flex; flex-direction: column; align-items: center; gap: var(--e1); margin: var(--e4) 0; color: var(--tinta); text-decoration: none; font: 600 .9rem/1.2 var(--f-ui); }
+.jn-cidade:hover { color: var(--vinho); }
+.jn-cidade:focus-visible { outline: 3px solid var(--azul); outline-offset: 4px; }
+.jn-cidade-img { width: 150px; height: auto; opacity: .92; }
+
+.jn-regiao { position: relative; margin-bottom: var(--e4); border-radius: var(--raio-g); overflow: hidden; background: var(--superficie); box-shadow: var(--moldura), var(--sombra); }
+.jn-cenario { display: block; width: 100%; height: 96px; }
+.jn-regiao[data-estado="atual"] .jn-cenario { height: 110px; }
+.jn-regiao-nome { position: absolute; top: var(--e2); left: var(--e3); margin: 0; padding: 2px var(--e3); border-radius: var(--raio-pilula); background: color-mix(in srgb, var(--superficie) 88%, transparent); color: var(--tinta); font: 700 .95rem/1.4 var(--f-ui); }
+.jn-regiao-nome::before { display: none; }
+
+.sv-ceu { fill: var(--j-ceu); }
+.sv-colina { fill: var(--j-colina); }
+.sv-pedra { fill: var(--j-pedra); }
+.sv-neve { fill: var(--j-neve); }
+.sv-arvore path { fill: var(--j-arvore); stroke: #5B3F2C; stroke-width: 2; stroke-linejoin: round; }
+.sv-estrada { fill: var(--j-estrada); }
+.sv-sol { fill: var(--j-sol); }
+.sv-lua { display: none; }
+.sv-lua circle { fill: var(--j-lua); }
+.sv-lua .sv-recorte { fill: var(--j-ceu); }
+:root[data-theme="dark"] .sv-sol { display: none; }
+:root[data-theme="dark"] .sv-lua { display: inline; }
+
+/* ---- Os quatro lugares fora da estrada ---- */
+.jn-lugares ul { list-style: none; margin: 0 0 var(--e4); padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--e3); }
+.jn-lugar { width: 100%; min-height: 96px; text-align: center; text-decoration: none; font-size: .95rem; }
+.jn-lugar-fig svg { width: 40px; height: auto; }
+
+/* ---- Estrada das Aulas: o primeiro marco fica embaixo e a estrada sobe; a ordem no HTML é a da caminhada ---- */
+.jn-estrada { list-style: none; margin: 0; padding: var(--e5) var(--e4); display: flex; flex-direction: column-reverse; gap: var(--e5); position: relative; }
+.jn-estrada::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; border-left: 4px dotted color-mix(in srgb, var(--pedra) 70%, transparent); }
+.jn-marco-item { position: relative; display: flex; align-items: center; gap: var(--e3); width: 62%; }
+.jn-marco-item:nth-child(even) { margin-left: auto; flex-direction: row-reverse; text-align: right; }
+.jn-estrada .marco { position: relative; min-width: 76px; min-height: 76px; text-decoration: none; background-color: var(--superficie); }
+.jn-marco-fig svg { display: block; width: 34px; height: auto; }
+.jn-marco-num { font-variant-numeric: tabular-nums; }
+.jn-selo { position: absolute; top: -10px; right: -10px; }
+.jn-marco-titulo { position: relative; padding: 0 var(--e1); border-radius: 6px; background: var(--superficie); min-width: 0; font: 600 .85rem/1.3 var(--f-ui); color: var(--tinta-2); overflow-wrap: anywhere; }
+.jn-marco-item[data-estado="proxima"] .jn-marco-titulo { color: var(--tinta); font-weight: 700; }
+.jn-viajante-lugar { order: -1; flex: none; }
+.jn-viajante-lugar svg { display: block; width: 44px; height: auto; }
+.jn-colo .jn-estrada { padding-inline: 0; }
+.jn-colo .jn-estrada::before { display: none; }
+.jn-colo .jn-estrada { flex-direction: column; } /* para os pais, a ordem de leitura é a da caminhada, de cima para baixo */
+.jn-colo .jn-marco-item, .jn-colo .jn-marco-item:nth-child(even) { width: 100%; margin: 0; flex-direction: row; text-align: left; }
+.jn-colo .jn-viajante-lugar { display: none; }
+.jn-colo .jn-continuar { margin-top: var(--e4); }
+
+/* ---- Brinquedos: dia e noite vêm do tema; botões de 64 px ou mais ---- */
+.jn-brinquedos { display: flex; justify-content: center; gap: var(--e3); padding: var(--e3) var(--e3) 0; }
+.jn-brinq { flex: 1 1 0; max-width: 140px; min-height: 84px; font-size: .9rem; }
+.jn-brinq > span { display: grid; justify-items: center; gap: 2px; }
+.jn-brinq .so-noite, :root[data-theme="dark"] .jn-brinq .so-dia { display: none; }
+:root[data-theme="dark"] .jn-brinq .so-noite { display: grid; }
+.jn-brinq-fig { display: inline-block; }
+.jn-brinq-fig .giro { transform-box: fill-box; transform-origin: center; }
+.jn-brinq .brilho { opacity: .25; transition: opacity var(--t-normal) var(--curva); }
+.jn-brinq.acesa .brilho { opacity: 1; }
+.jn-brinq.acesa { box-shadow: 0 0 14px 2px color-mix(in srgb, var(--j-sol) 70%, transparent); }
+.jn-brinq.tocado { outline: 3px solid var(--dourado, var(--vinho)); outline-offset: 2px; }
+.jn-flor { position: absolute; left: -14px; top: -6px; transform-origin: bottom center; }
+.jn-colo .jn-flor { display: none; }
+
+/* ---- Clima real sobre o cenário (só a faixa do cenário, nunca sobre a estrada) ---- */
+.jn-tempo { position: absolute; top: 0; left: 0; right: 0; height: 110px; overflow: hidden; pointer-events: none; z-index: 1; }
+[data-clima="nublado"] .jn-tempo { background: rgba(127, 135, 148, .35); }
+[data-clima="neblina"] .jn-tempo { background: rgba(232, 238, 242, .5); }
+[data-clima="chuva"] .jn-tempo { background: rgba(90, 100, 125, .3); }
+.pingo { position: absolute; top: 0; width: 2px; height: 14px; background: #cfe3ee; opacity: 0; }
+.folha { position: absolute; left: 0; width: 14px; height: 8px; border-radius: 0 100% 0 100%; background: #8fae5a; opacity: 0; }
+
+@media (max-width: 480px) { .jn-marco-item { width: 78%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .jn-guia.segurando .jn-guia-barra { animation: none; transform: scaleX(1); }
+}

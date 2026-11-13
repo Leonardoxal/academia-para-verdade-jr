@@ -1,0 +1,27 @@
+/* Tela da aula (views/infantil.js, aulaInfantil): ilustração e título, dois PDFs como objetos grandes, anexar, aula feita. */
+.aula { max-width: 760px; margin: 0 auto; }
+.aula-cab { text-align: center; display: grid; justify-items: center; gap: var(--e2); margin-bottom: var(--e4); }
+.aula-selo svg { width: 96px; height: auto; }
+.aula-cab h1 { margin: 0; }
+.aula-cab h1::after { margin-inline: auto; }
+.aula-objetos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--e4); margin: var(--e4) 0; }
+.aula-obj {
+  display: grid; justify-items: center; align-content: center; gap: var(--e2); text-align: center; text-decoration: none;
+  min-height: 160px; padding: var(--e4); color: var(--tinta); box-shadow: var(--moldura), var(--sombra);
+  transition: transform var(--t-rapido) var(--curva);
+}
+.aula-obj:hover { transform: translateY(-2px); }
+.aula-obj:focus-visible { outline: 3px solid var(--azul); outline-offset: 3px; }
+.aula-obj-fig svg { width: 32px; height: 32px; }
+/* Caderno: lombada à esquerda. Pergaminho: bordas arredondadas em cima e embaixo, como um rolo. */
+.aula-caderno { background: var(--superficie); border-radius: 6px var(--raio-g) var(--raio-g) 6px; border-left: 12px solid var(--vinho); }
+.aula-pergaminho { background: var(--pergaminho, var(--superficie)); border-radius: var(--raio-g); border-block: 8px solid var(--dourado, var(--vinho)); }
+.aula h2 { margin-top: var(--e5); }
+/* Etiqueta dourada sobre fundo claro não atingia 4,5:1; no tema claro ela usa o vinho. */
+:root:not([data-theme="dark"]) .inf-etq { color: var(--vinho); }
+/* Alvos de toque de pelo menos 44 px nas telas do adulto (resumos das caixas e botões). */
+summary { padding-block: 10px; }
+.btn { min-height: 44px; }
+/* Fichas com texto longo no chip (ex.: "mangá 1999-2014; anime 2002-2…") não podem alargar a página. */
+.chip { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: reduce) { .aula-obj { transition: none; } .aula-obj:hover { transform: none; } }
