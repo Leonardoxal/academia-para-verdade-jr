@@ -17,6 +17,13 @@ export const TRILHAS = {
   'mat-numero': {
     nome: 'Número e quantidade', area: 'Matemática', de: 2, ate: 6,
     finalidade: 'Contar com sentido: saber quantos há, comparar, ligar o número escrito à quantidade e juntar e tirar com objetos.',
+    // Objetivos da BNCC (Educação Infantil, campo "Espaços, tempos, quantidades, relações e transformações") que a trilha cobre.
+    bncc: [
+      ['EI02ET07', 'Contar oralmente objetos, pessoas, livros etc., em contextos diversos.'],
+      ['EI03ET07', 'Relacionar números às suas respectivas quantidades e identificar o antes, o depois e o entre em uma sequência.'],
+    ],
+    // Onde a trilha desemboca: o que ela prepara no ensino fundamental, sem antecipar esse conteúdo.
+    prepara: 'Adição e subtração com compreensão e o sistema de numeração, no 1º ano.',
   },
 };
 
@@ -129,38 +136,44 @@ const dia = (ms) => new Date(ms).toLocaleDateString('sv'); // AAAA-MM-DD no fuso
  *  'em-andamento'  o registro mais recente não é "dominado";
  *  'a-confirmar'   "dominado" observado num dia só: falta ver de novo em outro dia;
  *  'dominada'      "dominado" no registro mais recente e, além disso, ou a origem é "resultado confirmado em nova
- *                  verificação", ou há registros de "dominado" em pelo menos dois dias diferentes.
- * Uma observação isolada nunca basta para o domínio.
+ *                  verificação", ou há registros de "dominado" em pelo menos dois dias diferentes;
+ *  'rever'         dominada, mas a última verificação tem mais de DIAS_RETENCAO dias: conferir se continua sabendo.
+ * Uma observação isolada nunca basta para o domínio. Domínio é o que fica: por isso a retenção é conferida depois.
+ * "rever" não tira o domínio nem bloqueia as habilidades seguintes; só pede uma nova verificação.
  */
-export function estadoDaHabilidade(habilidade, registros) {
+export const DIAS_RETENCAO = 30;
+export function estadoDaHabilidade(habilidade, registros, agora = Date.now()) {
   const seus = registros.filter((r) => habilidadeDoTexto(r.habilidade)?.id === habilidade.id).sort((a, b) => a.criadoEm - b.criadoEm);
   const ultimo = seus.at(-1) ?? null;
   if (!ultimo) return { estado: 'sem-registro', ultimo: null };
   if (ultimo.situacao !== 'dominado') return { estado: 'em-andamento', ultimo };
   const diasDominado = new Set(seus.filter((r) => r.situacao === 'dominado').map((r) => dia(r.criadoEm)));
-  return { estado: ultimo.origem === 'confirmado' || diasDominado.size >= 2 ? 'dominada' : 'a-confirmar', ultimo };
+  if (ultimo.origem !== 'confirmado' && diasDominado.size < 2) return { estado: 'a-confirmar', ultimo };
+  return { estado: agora - ultimo.criadoEm > DIAS_RETENCAO * 86400000 ? 'rever' : 'dominada', ultimo };
 }
 
 export const ESTADOS = {
-  'sem-registro': 'Ainda não observada', 'em-andamento': 'Em andamento', 'a-confirmar': 'Confirmar em outro dia', dominada: 'Dominada',
+  'sem-registro': 'Ainda não observada', 'em-andamento': 'Em andamento', 'a-confirmar': 'Confirmar em outro dia', dominada: 'Dominada', rever: 'Dominada; rever se continua sabendo',
 };
 
 /** O mapa de uma trilha com o estado de cada habilidade e se ela está liberada (todos os pré-requisitos dominados). */
-export function mapaDaTrilha(trilha, registros) {
-  const linhas = HABILIDADES.filter((h) => h.trilha === trilha).map((h) => ({ habilidade: h, ...estadoDaHabilidade(h, registros) }));
-  const dominadas = new Set(linhas.filter((l) => l.estado === 'dominada').map((l) => l.habilidade.id));
+export const temDominio = (estado) => estado === 'dominada' || estado === 'rever';
+export function mapaDaTrilha(trilha, registros, agora = Date.now()) {
+  const linhas = HABILIDADES.filter((h) => h.trilha === trilha).map((h) => ({ habilidade: h, ...estadoDaHabilidade(h, registros, agora) }));
+  const dominadas = new Set(linhas.filter((l) => temDominio(l.estado)).map((l) => l.habilidade.id));
   return linhas.map((l) => ({ ...l, liberada: l.habilidade.prereq.every((p) => dominadas.has(p)), faltam: l.habilidade.prereq.filter((p) => !dominadas.has(p)) }));
 }
 
-const ORDEM = { 'a-confirmar': 0, 'em-andamento': 1, 'sem-registro': 2 };
+const ORDEM = { 'a-confirmar': 0, 'em-andamento': 1, 'sem-registro': 2, rever: 3 };
 
 /**
  * O que fazer agora numa trilha, no máximo `max` itens: primeiro confirmar o que foi visto uma vez, depois o que
- * está em andamento, depois habilidades novas já liberadas. Habilidade bloqueada por pré-requisito não aparece,
- * a não ser que já tenha registro (a criança pode ter avançado por outro caminho: aí vale observar).
+ * está em andamento, depois habilidades novas já liberadas e, por fim, as dominadas há mais de um mês, para conferir
+ * a retenção. Habilidade bloqueada por pré-requisito não aparece, a não ser que já tenha registro (a criança pode
+ * ter avançado por outro caminho: aí vale observar).
  */
-export function proximasHabilidades(trilha, registros, max = 3) {
-  return mapaDaTrilha(trilha, registros)
+export function proximasHabilidades(trilha, registros, max = 3, agora = Date.now()) {
+  return mapaDaTrilha(trilha, registros, agora)
     .filter((l) => l.estado !== 'dominada' && (l.liberada || l.estado !== 'sem-registro'))
     .sort((a, b) => ORDEM[a.estado] - ORDEM[b.estado])
     .slice(0, max);
