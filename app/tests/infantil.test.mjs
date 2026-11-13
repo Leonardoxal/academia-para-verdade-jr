@@ -18,7 +18,7 @@ import { rodadaQuantos, TEMAS, COISAS } from '../infantil/jogos.js';
 import { guardarPartida, anotarResposta, recorde, resumoJogo, recomendar, anosCompletos, interessesValidos, MAX_PARTIDAS } from '../infantil/historico.js';
 import { textoParaIA, OBSERVACOES } from '../infantil/prompt.js';
 import { validarRegistro, situacaoAtual, proximosPassos, AREAS } from '../infantil/registro.js';
-import { TRILHAS, HABILIDADES, habilidadePorId, habilidadeDoTexto, estadoDaHabilidade, mapaDaTrilha, proximasHabilidades, trilhasDaIdade } from '../infantil/habilidades.js';
+import { TRILHAS, HABILIDADES, DIAS_RETENCAO, habilidadePorId, habilidadeDoTexto, estadoDaHabilidade, mapaDaTrilha, proximasHabilidades, trilhasDaIdade } from '../infantil/habilidades.js';
 import { validarSerie, ondeEsta, proximo, alternar, marcarAte, progresso, arcosParaAnalisar, lerEstrutura, escreverEstrutura, tipoDoEpisodio } from '../infantil/series.js';
 import { MIDIA_INFANTIL, ASPECTOS, PERCURSOS, TIPOS_MIDIA } from '../infantil/midia.js';
 import { assistir, obraInfantil } from '../views/assistir.js';
@@ -753,7 +753,8 @@ test('mapa de habilidades: campos, pré-requisitos sem ciclo e em ordem, jogos e
 
 test('mapa de habilidades: uma observação não basta; domínio libera a seguinte; ordem do que fazer agora', () => {
   const DIA = 86400000;
-  const t0 = new Date('2026-11-02T12:00:00').getTime();
+  // datas relativas a hoje (meio-dia de nove dias atrás): o domínio recente não cai na revisão de retenção
+  const t0 = new Date().setHours(12, 0, 0, 0) - 9 * DIA;
   const r = (n, nome, situacao, extra = {}) => reg(n, { habilidade: nome, situacao, criadoEm: t0 + n * DIA, ...extra });
   const nome = (id) => habilidadePorId(id).nome;
   const recitar = habilidadePorId('mat-recitar-5');
@@ -786,4 +787,22 @@ test('mapa de habilidades: o formulário sugere as habilidades do mapa e o paine
   assert.match(tela, /list="inf-hab-lista"/);
   for (const h of HABILIDADES) assert.ok(tela.includes(`value="${h.nome}"`), h.id);
   assert.match(infantil(), /id="inf-habilidades"/);
+});
+
+test('mapa de habilidades: retenção — dominada há mais de um mês pede nova verificação, sem perder o domínio', () => {
+  const DIA = 86400000;
+  const t0 = new Date('2026-09-01T12:00:00').getTime();
+  const h = habilidadePorId('mat-recitar-5');
+  const regs = [reg(1, { habilidade: h.nome, situacao: 'dominado', criadoEm: t0 }), reg(2, { habilidade: h.nome, situacao: 'dominado', criadoEm: t0 + 2 * DIA })];
+  assert.equal(estadoDaHabilidade(h, regs, t0 + 10 * DIA).estado, 'dominada');
+  const depois = t0 + (DIAS_RETENCAO + 5) * DIA;
+  assert.equal(estadoDaHabilidade(h, regs, depois).estado, 'rever', 'passado o prazo, pede para rever');
+  const mapa = mapaDaTrilha('mat-numero', regs, depois);
+  assert.equal(mapa.find((l) => l.habilidade.id === 'mat-um-a-um-3').liberada, true, 'rever não bloqueia a habilidade seguinte');
+  const agora = proximasHabilidades('mat-numero', regs, 3, depois).map((l) => [l.habilidade.id, l.estado]);
+  assert.deepEqual(agora, [['mat-um-a-um-3', 'sem-registro'], ['mat-recitar-10', 'sem-registro'], ['mat-recitar-5', 'rever']], 'a revisão vem depois do que é novo');
+  const revisto = [...regs, reg(3, { habilidade: h.nome, situacao: 'dominado', criadoEm: depois })];
+  assert.equal(estadoDaHabilidade(h, revisto, depois + DIA).estado, 'dominada', 'verificada de novo, volta a dominada');
+  assert.equal(estadoDaHabilidade(h, [...regs, reg(3, { habilidade: h.nome, situacao: 'revisar', criadoEm: depois })], depois + DIA).estado, 'em-andamento', 'se esqueceu, volta a ser trabalhada');
+  for (const t of Object.values(TRILHAS)) { assert.ok(t.bncc.length && t.bncc.every(([c, texto]) => /^EI0[123][A-Z]{2}\d{2}$/.test(c) && texto.length > 20)); assert.ok(t.prepara.length > 20); }
 });

@@ -18,7 +18,7 @@ import { ETAPAS_INFANTIS, etapaDaIdade } from '../infantil/etapas.js';
 import { OBSERVACOES, textoParaIA, textoReforcoIA } from '../infantil/prompt.js';
 import { JOGOS } from '../infantil/jogos.js';
 import { AREAS, SITUACOES, ORIGENS, situacaoAtual, proximosPassos } from '../infantil/registro.js';
-import { TRILHAS, HABILIDADES, ESTADOS, habilidadeDoTexto, habilidadePorId, mapaDaTrilha, proximasHabilidades, trilhasDaIdade } from '../infantil/habilidades.js';
+import { TRILHAS, HABILIDADES, ESTADOS, temDominio, habilidadeDoTexto, habilidadePorId, mapaDaTrilha, proximasHabilidades, trilhasDaIdade } from '../infantil/habilidades.js';
 
 const MAX_BYTES = 25 * 1024 * 1024;
 const MAX_LADO = 1800;
@@ -410,7 +410,10 @@ const passoDoMapa = (l) => {
     <br><span class="meta">Objetivo:</span> ${esc(h.objetivo)}
     <br><span class="meta">Como verificar em 2 minutos:</span> ${esc(h.verificar)}
     <br><span class="meta">Há domínio quando:</span> ${esc(h.dominio)}
-    ${l.estado === 'a-confirmar' ? '<br><span class="meta">Já foi vista uma vez. Repita a verificação em outro dia e registre de novo antes de avançar.</span>' : `<br><span class="meta">Se ainda não consegue:</span> ${esc(h.intervencao)}`}
+    <br><span class="meta">Foi além quando:</span> ${esc(h.excelencia)}
+    ${l.estado === 'a-confirmar' ? '<br><span class="meta">Já foi vista uma vez. Repita a verificação em outro dia e registre de novo antes de avançar.</span>'
+    : l.estado === 'rever' ? '<br><span class="meta">Dominada há mais de um mês. Repita a verificação: se continua sabendo, registre de novo como dominada; se não, registre como "Precisa de revisão".</span>'
+    : `<br><span class="meta">Se ainda não consegue:</span> ${esc(h.intervencao)}`}
     ${j ? `<br>${link(`jogo-${h.jogo}`, `Jogo que treina isto: ${j.titulo}`)}` : ''}</li>`;
 };
 
@@ -420,12 +423,13 @@ function blocoDoMapa(f, regs) {
     const t = TRILHAS[id];
     const mapa = mapaDaTrilha(id, regs);
     const agora = proximasHabilidades(id, regs);
-    const dominadas = mapa.filter((l) => l.estado === 'dominada').length;
+    const dominadas = mapa.filter((l) => temDominio(l.estado)).length;
     return `<details class="inf-caixa" open><summary><strong>${esc(t.nome)}: ${esc(f.nome)}</strong> <span class="meta">(${dominadas} de ${mapa.length} dominadas)</span></summary>
       <p class="meta">${esc(t.finalidade)} As idades são referência: o que libera uma habilidade é o domínio das anteriores. Observe na brincadeira, sem clima de prova, e registre na página da aula.</p>
       ${agora.length ? `<h3>O que fazer agora</h3><ul class="inf-passos">${agora.map(passoDoMapa).join('')}</ul>` : '<p>Trilha concluída. Mantenha as habilidades vivas na rotina.</p>'}
       <details><summary>Ver o mapa inteiro</summary><table class="inf-tabela"><tr><th>Habilidade</th><th>Idade de referência</th><th>Depende de</th><th>Situação</th></tr>
       ${mapa.map((l) => `<tr><td>${esc(l.habilidade.nome)}</td><td>${l.habilidade.de} a ${l.habilidade.ate} anos</td><td>${l.habilidade.prereq.map((p) => esc(habilidadePorId(p).nome)).join('; ') || '—'}</td><td>${esc(ESTADOS[l.estado])}</td></tr>`).join('')}</table>
+      <p class="meta">Objetivos da BNCC cobertos: ${t.bncc.map(([c, texto]) => `${esc(c)} (${esc(texto)})`).join(' ')} A trilha vai além deles na cardinalidade, na comparação e em juntar e tirar. Prepara: ${esc(t.prepara)}</p>
       <p class="meta">Sequência adaptada de Gelman e Gallistel (1978) e de Clements e Sarama (2009). A forma usada aqui é proposta da Academia e ainda não foi revista por especialista.</p></details></details>`;
   }).join('');
 }
