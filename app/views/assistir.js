@@ -24,8 +24,8 @@ const fichaCurta = (m) => `<li class="inf-caixa as-obra" data-idade="${m.idade}"
 
 export function assistir() {
   return `<section class="infantil assistir">
-    <p class="migalha">${link('infantil', '← Academia para Verdade Jr.')}</p>
-    <header class="cab"><h1>Filmes, séries, animações e quadrinhos</h1>
+    <p class="migalha">${link('infantil', '← Voltar ao mapa')}</p>
+    <header class="cab"><span class="inf-etq">Filmes, séries, animações e quadrinhos</span><h1>Estalagem das Histórias</h1>
       <p class="sub">Obras escolhidas pelo que podem formar, com ficha para os pais: o que está na obra, a leitura da Academia, os cuidados e as perguntas para conversar. A idade indicada é avaliação da Academia; a classificação oficial deve ser conferida na ClassInd.</p></header>
     <label class="campo"><span>Para quem</span><select id="as-quem"><option value="">Escolha o filho</option></select></label>
     <p class="meta" id="as-idade" aria-live="polite"></p>

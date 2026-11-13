@@ -1,0 +1,90 @@
+/* Fundação visual da Jornada (etapa 2).
+   Carregada por último. Define as variáveis de medida, o pergaminho de fundo e os componentes-base que as telas
+   novas usam: moldura de iluminura, botão de toque, cartão de pergaminho, selo de cera, marco de pedra.
+   As cores vêm das variáveis de base.css (claro e escuro); aqui só se acrescentam variáveis de medida e de superfície. */
+
+:root {
+  /* escala de espaçamento (4 px de base) */
+  --e1: 4px; --e2: 8px; --e3: 12px; --e4: 16px; --e5: 24px; --e6: 36px; --e7: 56px;
+  /* cantos */
+  --raio-m: 12px; --raio-g: 22px; --raio-pilula: 999px;
+  /* alvo mínimo de toque para a criança de 3 anos */
+  --alvo: 64px;
+  /* movimento */
+  --t-rapido: 150ms; --t-normal: 320ms; --curva: cubic-bezier(.22, .8, .3, 1);
+  /* pergaminho: duas luzes suaves sobre o papel, sem imagem */
+  --pergaminho: radial-gradient(1200px 600px at 12% -10%, color-mix(in srgb, var(--ouro-claro) 22%, transparent), transparent 70%),
+                radial-gradient(900px 500px at 100% 100%, color-mix(in srgb, var(--vinho) 7%, transparent), transparent 70%);
+  /* moldura de iluminura: fio duplo dourado */
+  --moldura: 0 0 0 2px color-mix(in srgb, var(--ouro) 60%, var(--linha)), 0 0 0 5px var(--superficie), 0 0 0 6px color-mix(in srgb, var(--ouro) 38%, transparent);
+  --selo-cera: var(--vinho);
+}
+
+body { background-image: var(--pergaminho); background-attachment: fixed; }
+
+/* Títulos: florão dourado sob o título da página */
+main h1::after {
+  content: ""; display: block; width: min(220px, 60%); height: 10px; margin-top: var(--e2);
+  background:
+    linear-gradient(90deg, transparent, var(--ouro) 18%, var(--ouro) 42%, transparent 42.5%, transparent 57.5%, var(--ouro) 58%, var(--ouro) 82%, transparent) center / 100% 2px no-repeat,
+    radial-gradient(circle, var(--ouro) 0 3px, transparent 3.5px) center / 10px 10px no-repeat;
+}
+
+/* Correção de contraste: o título do herói saía em dourado claro sobre o cartão claro (cerca de 1,7:1). */
+.inf-hero h1 { color: var(--vinho); }
+
+/* Botões: estados desenhados (toque, teclado) */
+.btn { transition: transform var(--t-rapido) var(--curva), border-color var(--t-rapido), background-color var(--t-rapido); }
+.btn:active:not([disabled]) { transform: translateY(1px); }
+.btn:focus-visible { outline: 3px solid var(--ouro); outline-offset: 3px; }
+
+/* ---- Componentes da Jornada ---- */
+
+/* Botão de toque da criança: grande, redondo, com a figura em cima e o nome embaixo (o nome é para o adulto ler). */
+.toque {
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--e1);
+  min-width: var(--alvo); min-height: var(--alvo); padding: var(--e2);
+  border: 2px solid var(--ouro); border-radius: var(--raio-g); background: var(--superficie); color: var(--tinta);
+  font: 700 .85rem/1.2 var(--f-ui); text-align: center; cursor: pointer; text-decoration: none;
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--ouro) 55%, transparent);
+  transition: transform var(--t-rapido) var(--curva), box-shadow var(--t-rapido);
+}
+.toque:hover { border-color: var(--vinho); }
+.toque:active { transform: translateY(2px); box-shadow: 0 1px 0 color-mix(in srgb, var(--ouro) 55%, transparent); }
+.toque:focus-visible { outline: 3px solid var(--azul); outline-offset: 3px; }
+.toque svg { display: block; width: 100%; max-width: 72px; height: auto; }
+
+/* Cartão de pergaminho com moldura dupla */
+.pergaminho { position: relative; padding: var(--e5); border-radius: var(--raio-g); background: var(--superficie); box-shadow: var(--moldura), var(--sombra); }
+.pergaminho > :first-child { margin-top: 0; }
+.pergaminho > :last-child { margin-bottom: 0; }
+
+/* Capitular da Sala do Guia: primeira letra do primeiro parágrafo, em iluminura */
+.capitular > p:first-of-type::first-letter {
+  float: left; font: 700 3.1em/.85 var(--f-capital); color: var(--vinho); padding: .06em .1em 0 0;
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--ouro) 70%, transparent);
+}
+
+/* Selo de cera: marca o que foi concluído. Nunca desaparece e nunca é perdido por faltar um dia. */
+.selo {
+  display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--selo-cera) 70%, #fff), var(--selo-cera) 65%);
+  color: var(--papel); font: 700 .8rem/1 var(--f-ui); box-shadow: 0 2px 4px rgb(0 0 0 / .3), inset 0 0 0 2px rgb(255 255 255 / .12);
+}
+
+/* Marco de pedra da Estrada: uma aula por marco */
+.marco {
+  display: grid; justify-items: center; gap: var(--e1); min-width: var(--alvo); padding: var(--e2) var(--e3);
+  border-radius: 14px 14px 6px 6px; border: 2px solid var(--pedra);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--pedra) 20%, var(--superficie)), var(--superficie));
+  color: var(--tinta); font: 700 .8rem/1.2 var(--f-ui);
+}
+.marco.atual { border-color: var(--vinho); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ouro) 55%, transparent); }
+.marco.futuro { opacity: .6; border-style: dashed; }
+
+/* Terra ainda não visitada: esmaecida, sem cadeado e sem contagem */
+.terra-futura { opacity: .55; filter: saturate(.6); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn, .toque { transition: none; }
+}

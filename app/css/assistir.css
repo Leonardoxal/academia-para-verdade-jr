@@ -1,0 +1,8 @@
+.as-lista { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.as-lista h3 { margin: 0 0 .3em; }
+.as-grade { display: flex; flex-wrap: wrap; gap: 6px; margin: .4em 0 1em; }
+.as-ep { min-width: 44px; min-height: 44px; border: 2px solid var(--linha); border-radius: 10px; background: var(--superficie); color: var(--tinta); font: 600 .95rem var(--f-ui); cursor: pointer; }
+.as-ep.visto { background: var(--azul-suave); border-color: var(--azul, var(--linha)); }
+.as-ep.prox { outline: 3px solid var(--ouro); outline-offset: 1px; }
+.as-ep.outro { border-style: dashed; }
+.as-ia { width: 100%; margin: .5em 0; }

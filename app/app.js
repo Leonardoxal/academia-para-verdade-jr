@@ -1,6 +1,7 @@
 import { cruz } from './ornamentos.js';
 import { esc, toast } from './ui.js';
-import { infantil, aulaInfantil } from './views/infantil.js';
+import { infantil, aulaInfantil, mosteiro } from './views/infantil.js';
+import { jornada } from './views/jornada.js';
 import { jogos, jogo } from './views/jogos.js';
 import { assistir, obraInfantil, acompanhamento } from './views/assistir.js';
 import { desenhar } from './views/desenho.js';
@@ -8,7 +9,8 @@ import { entrar } from './views/entrar.js';
 import { sair } from './nuvem.js';
 
 const NAV = [['infantil', 'Infantil'], ['jogos', 'Jogos']];
-const ROTAS = { infantil, jogos, assistir, desenhar, entrar };
+// #infantil é a Jornada (Porta da Casa e Mapa). A página longa de antes continua inteira em #guia (Sala do Guia).
+const ROTAS = { infantil: jornada, guia: infantil, mosteiro, jogos, assistir, desenhar, entrar };
 const PREFIXOS = [
   ['acompanhar-', acompanhamento],
   ['assistir-', obraInfantil],
@@ -28,7 +30,7 @@ function resolver(token) {
   for (const [prefixo, view] of PREFIXOS) {
     if (token.startsWith(prefixo)) return { view, id: token.slice(prefixo.length), secao: prefixo === 'jogo-' ? 'jogos' : 'infantil' };
   }
-  return { view: infantil, id: null, secao: 'infantil' };
+  return { view: jornada, id: null, secao: 'infantil' };
 }
 
 function render() {
@@ -62,11 +64,12 @@ window.addEventListener('hashchange', () => {
 
 document.getElementById('emblema').innerHTML = cruz(34);
 const TEMAS = ['auto', 'light', 'dark'];
-const NOMES_TEMA = { auto: 'automático', light: 'claro', dark: 'escuro' };
+const NOMES_TEMA = { auto: 'pelo horário', light: 'claro', dark: 'escuro' };
 const botaoTema = document.getElementById('tema');
+// No automático a noite é o tema escuro: das 18h às 6h, pelo relógio do aparelho. Claro e escuro fixam o tema.
+const horaNoturna = (agora = new Date()) => agora.getHours() >= 18 || agora.getHours() < 6;
 function aplicarTema(tema) {
-  if (tema === 'auto') delete document.documentElement.dataset.theme;
-  else document.documentElement.dataset.theme = tema;
+  document.documentElement.dataset.theme = tema === 'auto' ? (horaNoturna() ? 'dark' : 'light') : tema;
   botaoTema.textContent = `Tema: ${NOMES_TEMA[tema]}`;
 }
 let tema = 'auto';
@@ -80,5 +83,6 @@ botaoTema.addEventListener('click', () => {
   aplicarTema(tema);
   try { localStorage.setItem('academia-verdade-tema', tema); } catch { /* A preferência vale até fechar esta aba. */ }
 });
+setInterval(() => { if (tema === 'auto') aplicarTema('auto'); }, 5 * 60 * 1000); // o dia vira noite sem recarregar a página
 
 render();

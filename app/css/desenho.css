@@ -1,0 +1,5 @@
+.jg-tema-desenho { --jg-cor: #b0457a; }
+.dz-ferr { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 10px; }
+.dz-cor { width: 48px; height: 48px; border-radius: 50%; border: 3px solid var(--linha); cursor: pointer; }
+.dz-cor.ativa, .dz-pincel.ativa { outline: 3px solid var(--ouro); outline-offset: 2px; }
+.dz-tela { display: block; width: 100%; border-radius: 12px; border: 3px solid var(--linha); background: #fff; touch-action: none; cursor: crosshair; }

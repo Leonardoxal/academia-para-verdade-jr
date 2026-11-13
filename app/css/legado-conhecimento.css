@@ -1,0 +1,134 @@
+/* ---------- Mapa do conhecimento (árvore) e abas árvore/escada ---------- */
+:root { --g-teologia: var(--vinho); --g-filosofia: var(--ouro-texto); --g-humanas: var(--azul); --g-formais: #2f6152; --g-artes: #5b3a70; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --g-formais: #8fc4ae; --g-artes: #c6a8da; } }
+:root[data-theme="dark"] { --g-formais: #8fc4ae; --g-artes: #c6a8da; }
+.abas-mapa { display: flex; gap: 0; margin: 0 0 14px; border-bottom: 1px solid var(--linha); }
+.abas-mapa a { font: 600 .78rem/1 var(--f-capital); letter-spacing: .1em; text-transform: uppercase; padding: 10px 14px; color: var(--tinta-2); text-decoration: none; border: 1px solid transparent; border-bottom: 0; border-radius: 10px 10px 0 0; margin-bottom: -1px; }
+.abas-mapa a[aria-current="page"] { color: var(--vinho); background: var(--superficie); border-color: var(--linha); box-shadow: inset 0 2px 0 var(--ouro); }
+.nota-arvore { border-left: 2px solid var(--ouro); padding-left: 10px; }
+.arvore-ferr { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; }
+.arvore-ferr .campo { flex: 1 1 260px; }
+.grupo-btn { display: flex; flex-wrap: wrap; gap: 6px; }
+.grupo-btn [aria-pressed="true"] { background: var(--vinho); color: var(--superficie); border-color: var(--vinho); }
+.filtro-grupos, .legenda-arvore { border: 1px solid var(--linha); border-radius: var(--raio); padding: 8px 12px 10px; margin: 10px 0; display: flex; flex-wrap: wrap; gap: 6px 14px; font: .82rem var(--f-ui); color: var(--tinta-2); background: var(--superficie); }
+.filtro-grupos legend, .legenda-arvore legend { font: 600 .7rem var(--f-capital); letter-spacing: .1em; text-transform: uppercase; padding: 0 6px; color: var(--tinta-2); }
+.chip-filtro { display: inline-flex; align-items: center; gap: 6px; border-left: 4px solid var(--g); padding: 2px 8px; }
+.leg { display: inline-flex; align-items: center; gap: 6px; }
+.amostra-preparo { width: 30px; height: 14px; border: 1.5px dashed var(--pedra); border-radius: 6px 6px 0 0; }
+.g-teologia { --g: var(--g-teologia); } .g-filosofia { --g: var(--g-filosofia); } .g-humanas { --g: var(--g-humanas); } .g-formais { --g: var(--g-formais); } .g-artes { --g: var(--g-artes); }
+.arvore-corpo { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 14px; align-items: start; }
+.arvore-tela { position: relative; border: 1px solid var(--linha); border-radius: 14px 14px var(--raio) var(--raio); overflow: hidden; height: min(72vh, 680px);
+  background: radial-gradient(ellipse at 18% 40%, color-mix(in srgb, var(--ouro) 10%, transparent), transparent 60%), var(--superficie);
+  box-shadow: inset 0 0 0 4px var(--superficie), inset 0 0 0 5px color-mix(in srgb, var(--ouro) 45%, transparent); }
+#arvore-svg { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; user-select: none; }
+#arvore-svg.arrastando { cursor: grabbing; }
+.arvore-painel { border: 1px solid var(--linha); border-radius: 14px 14px var(--raio) var(--raio); background: var(--superficie); padding: 14px 16px; max-height: min(72vh, 680px); overflow: auto; font-size: .95rem; }
+.arvore-painel h2 { font-size: 1.45rem; margin-top: 2px; }
+.arvore-painel h3 { font: 600 .72rem var(--f-capital); letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-2); margin: 14px 0 4px; }
+.arvore-painel .feito > a::after, .arvore-lista .feito > a::after { content: " ✓"; color: var(--ok); }
+.link-no { background: none; border: 0; padding: 0; font: inherit; color: var(--azul); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; text-align: left; }
+.link-no:focus-visible { outline: 2px solid var(--ouro); outline-offset: 2px; }
+.arvore-lista { margin: 10px 0; } .arvore-lista ul { margin: 4px 0; padding-left: 1.2em; }
+.chip.rel-prerequisito { border-left: 3px solid var(--vinho); } .chip.rel-historica { border-left: 3px solid var(--ouro); }
+.chip.rel-conceitual { border-left: 3px solid var(--azul); } .chip.rel-interdisciplinar { border-left: 3px solid var(--g-formais); }
+/* Ligações: cada tipo tem cor e traço próprios (não depende só da cor). */
+.lig { fill: none; stroke-width: 1.6; }
+.lig-hierarquia { stroke: var(--pedra); stroke-width: 1.8; opacity: .8; }
+.lig-prerequisito { stroke: var(--vinho); stroke-dasharray: 7 4; }
+.lig-historica { stroke: var(--ouro); stroke-dasharray: 1.5 4; stroke-linecap: round; stroke-width: 2.2; }
+.lig-conceitual { stroke: var(--azul); stroke-dasharray: 10 4 2 4; }
+.lig-interdisciplinar { stroke: var(--g-formais); stroke-dasharray: 14 6; }
+.lig.destaque { stroke: var(--vinho); stroke-width: 3.2; stroke-dasharray: none; opacity: 1; }
+.lig title { pointer-events: none; }
+#cena .lig:not(.lig-hierarquia) { opacity: .75; } #cena .lig:hover { opacity: 1; stroke-width: 3; }
+.seta path { fill: var(--vinho); }
+/* Nós: arco de topo arredondado, friso interno (moldura de manuscrito) e faixa da área. */
+.no { cursor: pointer; outline: none; }
+.no-fundo { fill: var(--superficie); stroke: var(--g); stroke-width: 1.4; }
+.no-friso { fill: none; stroke: color-mix(in srgb, var(--g) 35%, transparent); stroke-width: .8; }
+.no-faixa { fill: var(--g); }
+.no-nome { font: 600 13px var(--f-texto); fill: var(--tinta); }
+.no-pct { font: 10px var(--f-ui); fill: var(--tinta-2); }
+.no-trilho { fill: var(--papel-2); } .no-prog { fill: var(--g); }
+.no-rosa { color: var(--ouro); }
+.no-botao circle { fill: var(--g); stroke: var(--superficie); stroke-width: 2; } .no-botao text { font: 700 11px var(--f-ui); fill: var(--superficie); }
+.no.raiz .no-fundo { fill: var(--bordo-2); stroke: var(--ouro); stroke-width: 2; } .no.raiz .no-nome { fill: #f3e7c9; font: 700 13px var(--f-capital); letter-spacing: .04em; }
+.no.raiz .no-friso { stroke: var(--ouro-claro); } .no.raiz .no-rosa { color: var(--ouro-claro); } .no.raiz .no-pct { fill: #e9dcc0; } .no.raiz .no-trilho { fill: rgb(255 255 255 / .2); } .no.raiz .no-prog { fill: var(--ouro-claro); }
+.no.preparo .no-fundo { stroke-dasharray: 5 3; fill: color-mix(in srgb, var(--superficie) 70%, var(--papel-2)); }
+.no.preparo .no-nome { fill: var(--tinta-2); font-style: italic; }
+.no:hover .no-fundo { stroke-width: 2.4; }
+.no.sel .no-fundo, .no:focus-visible .no-fundo { stroke: var(--ouro); stroke-width: 3; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--ouro) 60%, transparent)); }
+.no:focus-visible .no-friso { stroke: var(--ouro); stroke-width: 1.4; }
+.no.trilha .no-fundo { stroke: var(--vinho); stroke-width: 3; }
+.no.apagado { opacity: .22; }
+@media (max-width: 860px) {
+  .arvore-corpo { grid-template-columns: minmax(0, 1fr); }
+  .arvore-tela { height: 62vh; }
+  .arvore-painel { max-height: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+
+/* ---------- Santo de referência (views/santo.js): medalhão em moldura de vitral, expansível ---------- */
+.santos-aba { display: grid; gap: 8px; margin: -4px 0 18px; }
+.santo { border: 1px solid var(--linha); border-radius: 999px 999px var(--raio) var(--raio) / 28px 28px var(--raio) var(--raio); background: var(--superficie); box-shadow: inset 0 0 0 3px var(--superficie), inset 0 0 0 4px color-mix(in srgb, var(--ouro) 40%, transparent); }
+.santo[open] { border-radius: 28px 28px var(--raio) var(--raio); }
+.santo > summary { display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 10px; cursor: pointer; list-style: none; flex-wrap: wrap; }
+.santo > summary::-webkit-details-marker { display: none; }
+.santo > summary::after { content: "▾"; margin-left: auto; color: var(--ouro-texto); transition: transform .2s; }
+.santo[open] > summary::after { transform: rotate(180deg); }
+.santo > summary img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: top; border: 2px solid var(--ouro); background: var(--papel-2); flex: none; }
+.santo > summary > span:first-of-type { display: flex; flex-direction: column; line-height: 1.2; }
+.santo-rot { font: 600 .66rem var(--f-capital); letter-spacing: .12em; text-transform: uppercase; color: var(--tinta-2); }
+.santo > summary strong { font-family: var(--f-titulo); font-size: 1.1rem; color: var(--vinho); }
+.santo .chip { font-size: .7rem; }
+.santo-patronagem { border-left: 3px solid var(--ouro); } .santo-tematica { border-left: 3px solid var(--azul); } .santo-devocao { border-left: 3px solid var(--pedra); }
+.santo-corpo { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 14px; padding: 4px 16px 14px; font-size: .95rem; }
+.santo-corpo p { margin: 0 0 .5em; }
+.santo-corpo figure { margin: 0; }
+.santo-corpo figure img { width: 120px; height: 150px; object-fit: cover; object-position: top; display: block; border-radius: 60px 60px 2px 2px; border: 2px solid var(--ouro); background: var(--papel-2); }
+.santo-corpo figcaption { font: .68rem var(--f-ui); color: var(--tinta-2); margin-top: 4px; }
+.santo.compacto { margin: 8px 0 12px; } .santo.compacto .santo-corpo { grid-template-columns: minmax(0, 1fr); } .santo.compacto figure { display: none; }
+@media (max-width: 560px) { .santo-corpo { grid-template-columns: minmax(0, 1fr); } .santo-corpo figure img { width: 96px; height: 120px; } }
+
+/* ---------- Conexões entre conteúdos e percursos das disciplinas ---------- */
+.conexoes { border: 1px solid var(--linha); border-radius: 14px 14px var(--raio) var(--raio); background: var(--superficie); padding: 14px 18px; }
+.conexoes dl { margin: 0; display: grid; gap: 8px; }
+.conexao { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 4px 14px; padding-bottom: 8px; border-bottom: 1px dotted var(--linha); }
+.conexao:last-child { border-bottom: 0; }
+.conexao dt { font: 600 .7rem var(--f-capital); letter-spacing: .1em; text-transform: uppercase; color: var(--ouro-texto); padding-top: 3px; }
+.conexao dd { margin: 0; }
+@media (max-width: 640px) { .conexao { grid-template-columns: minmax(0, 1fr); } }
+.revisar-aulas { margin-top: 8px; font: .9rem var(--f-ui); }
+.chip.brasil { background: color-mix(in srgb, var(--ok) 18%, var(--superficie)); color: var(--tinta); }
+.vinculos-extra select { max-width: 100%; }
+.etapas-disc { list-style: none; padding: 0; display: grid; gap: 8px; }
+.etapas-disc details { border: 1px solid var(--linha); border-radius: var(--raio); background: var(--superficie); }
+.etapas-disc summary { cursor: pointer; padding: 10px 14px; font-weight: 600; }
+.etapas-disc summary .num { display: block; font: 600 .7rem var(--f-capital); letter-spacing: .1em; text-transform: uppercase; color: var(--ouro-texto); }
+.etapa-corpo { padding: 0 16px 12px; }
+.etapa-corpo h3 { font: 600 .72rem var(--f-capital); letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-2); margin: 12px 0 4px; }
+.brasil-nota { border-left: 3px solid var(--ok); padding-left: 10px; }
+
+/* ---------- Fases, grade escolar, avaliação conjunta e laboratório de símbolos ---------- */
+:root { --g-naturais: #2f6152; --g-simbolos: #7a3b1d; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --g-naturais: #8fc4ae; --g-simbolos: #e0a77f; } }
+:root[data-theme="dark"] { --g-naturais: #8fc4ae; --g-simbolos: #e0a77f; }
+:root { --g-formais: #3f4f8a; } :root[data-theme="dark"] { --g-formais: #a9b6e8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --g-formais: #a9b6e8; } }
+.g-naturais { --g: var(--g-naturais); } .g-simbolos { --g: var(--g-simbolos); }
+.fase { margin: 4px 0 10px; font: .9rem var(--f-ui); color: var(--tinta-2); }
+.fase .chip { background: var(--vinho); color: var(--superficie); }
+.fase-chip { font-size: .66rem; vertical-align: middle; margin-left: 6px; }
+.grade-escolar { border: 1px solid var(--linha); border-radius: 14px 14px var(--raio) var(--raio); background: var(--superficie); padding: 14px 18px; margin-bottom: 18px; }
+.por-area td:last-child strong { color: var(--erro); }
+.lab { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 18px; align-items: start; }
+.lab-lista { border: 1px solid var(--linha); border-radius: 14px 14px var(--raio) var(--raio); background: var(--superficie); padding: 10px 14px; }
+.lab-lista h3 { font: 600 .7rem var(--f-capital); letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-2); margin: 10px 0 4px; }
+.lista-simbolos { list-style: none; padding: 0; margin: 0; } .lista-simbolos a { display: block; padding: 4px 6px; border-radius: var(--raio); }
+.lista-simbolos a[aria-current="true"] { background: var(--vinho); color: var(--superficie); text-decoration: none; }
+.lab-ficha { border: 1px solid var(--linha); border-radius: 14px 14px var(--raio) var(--raio); background: var(--superficie); padding: 14px 18px; }
+.sentido-escritura { border-left: 3px solid var(--vinho); } .sentido-doutrina { border-left: 3px solid var(--ouro); } .sentido-historia { border-left: 3px solid var(--azul); }
+.sentido-interpretacao { border-left: 3px solid var(--g-naturais); } .sentido-hipotese { border-left: 3px dashed var(--pedra); }
+.comparar { border-left: 2px solid var(--ouro); padding-left: 10px; }
+@media (max-width: 760px) { .lab { grid-template-columns: minmax(0, 1fr); } }
+
