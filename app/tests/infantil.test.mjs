@@ -506,7 +506,7 @@ test('nuvem e backup: registros de habilidade por filho', async () => {
   assert.deepEqual(lidos[0], { ...reg(1000, { reavaliar: '2026-11-20' }), dificuldade: '', intervencao: '' });
   await arm.apagarRegistro('f1', ID(1000));
   assert.equal((await arm.listarRegistros('f1')).length, 0);
-  const tela = aulaInfantil({}, '2026-11-11');
+  const tela = aulaInfantil({}, '2026-11-12');
   assert.match(tela, /Registrar o que foi confirmado/);
   assert.match(tela, /Parcialmente dominado/);
 });
