@@ -2,6 +2,25 @@
 // Cada aula tem dois PDFs; os caminhos são relativos a app/index.html.
 export const AULAS_INFANTIL = [
   {
+    "data": "2026-11-12",
+    "titulo": "O pastor conta as ovelhas",
+    "tema": "Lucas 15,4-7 e João 10,11",
+    "virtude": "Confiança",
+    "icone": "ovelha",
+    "perfil": "menina",
+    "filho": "f1",
+    "para": "Filha 1",
+    "resumo": "Aula de reforço: a ovelha perdida e Jesus, o Bom Pastor. Mais, menos e mesma quantidade com figuras do mesmo tamanho, quantidade e tamanho, classificar por uma regra clara, sheep, one, two, three.",
+    "arquivos": {
+      "aluna": "infantil/aulas/2026-11-12/ACI_2026-11-12_ALUNA.pdf",
+      "responsavel": "infantil/aulas/2026-11-12/ACI_2026-11-12_RESPONSAVEL.pdf"
+    },
+    "paginas": {
+      "aluna": 14,
+      "responsavel": 18
+    }
+  },
+  {
     "data": "2026-11-11-f2",
     "titulo": "São Martinho e a capa",
     "tema": "Mateus 25,35-40",
@@ -18,25 +37,6 @@ export const AULAS_INFANTIL = [
     "paginas": {
       "aluna": 9,
       "responsavel": 11
-    }
-  },
-  {
-    "data": "2026-11-11",
-    "titulo": "São Martinho e a capa",
-    "tema": "Mateus 25,35-40",
-    "virtude": "Caridade",
-    "icone": "ovelha",
-    "perfil": "menina",
-    "filho": "f1",
-    "para": "Filha 1",
-    "resumo": "São Martinho dividiu a capa com um pobre com frio. Contar até 3, palavras em inglês (cloak, friend, heart, hand) e o Sinal da Cruz.",
-    "arquivos": {
-      "aluna": "infantil/aulas/2026-11-11/ACI_2026-11-11_ALUNA.pdf",
-      "responsavel": "infantil/aulas/2026-11-11/ACI_2026-11-11_RESPONSAVEL.pdf"
-    },
-    "paginas": {
-      "aluna": 11,
-      "responsavel": 12
     }
   },
   {
