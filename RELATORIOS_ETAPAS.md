@@ -95,3 +95,14 @@
 - **Divergência:** o teste que impedia livros já pedidos pelo curso da Verdade foi retirado em vez de trocado por uma lista fixa. Baixo risco enquanto a biblioteca não mudar.
 - **Não feito nesta revisão:** login real, código da família, anexo de tarefa e sincronização entre dois aparelhos (pedem a conta da família); leitura dos PDFs página a página.
 - **Atenção na publicação:** o `pages.yml` publica a cada push na `main`, então o primeiro push já põe o site no ar. Os e-mails de confirmação e de nova senha do Supabase continuam levando à URL configurada no projeto (a da Verdade).
+
+## RELATÓRIO JR — Mapa de habilidades (12/11/2026)
+
+- **Feito:** mapa de habilidades com uma trilha (Número e quantidade, 2 a 6 anos, 10 habilidades), regra de domínio (dois dias diferentes ou nova verificação), bloco "O que fazer agora" no painel dos pais e sugestões do mapa no formulário de registro.
+- **Arquivos:** `app/infantil/habilidades.js` (novo), `app/views/infantil.js`, `app/index.html` (duas regras de estilo), `app/tests/infantil.test.mjs`, `README.md`.
+- **Testes:** `node --test app/tests/infantil.test.mjs` — 43 passaram, 0 falharam (3 novos).
+- **Conferência no navegador:** servidor local, Chrome sem interface, largura de 390 px, com uma criança fictícia e quatro registros de exemplo num perfil descartável. O painel mostrou a trilha, os estados "Confirmar em outro dia" e "Em andamento" e o link do jogo; nenhum erro de JavaScript; sem rolagem lateral. Não conferido: tema escuro, largura de computador e uso com a nuvem.
+- **Desvios:** nenhuma mudança no banco; a ligação entre registro e mapa é pelo nome da habilidade.
+- **Riscos:** a sequência e os critérios são proposta da Academia, adaptada de Gelman e Gallistel (1978) e de Clements e Sarama (2009), sem revisão de especialista. Renomear uma habilidade do mapa desliga os registros antigos dela.
+- **Publicação:** não publicado. Está no ramo `claude/mapa-de-habilidades`, à espera da aprovação do responsável.
+

@@ -17,7 +17,8 @@ import { jogos, jogo } from '../views/jogos.js';
 import { rodadaQuantos, TEMAS, COISAS } from '../infantil/jogos.js';
 import { guardarPartida, anotarResposta, recorde, resumoJogo, recomendar, anosCompletos, interessesValidos, MAX_PARTIDAS } from '../infantil/historico.js';
 import { textoParaIA, OBSERVACOES } from '../infantil/prompt.js';
-import { validarRegistro, situacaoAtual, proximosPassos } from '../infantil/registro.js';
+import { validarRegistro, situacaoAtual, proximosPassos, AREAS } from '../infantil/registro.js';
+import { TRILHAS, HABILIDADES, habilidadePorId, habilidadeDoTexto, estadoDaHabilidade, mapaDaTrilha, proximasHabilidades, trilhasDaIdade } from '../infantil/habilidades.js';
 import { validarSerie, ondeEsta, proximo, alternar, marcarAte, progresso, arcosParaAnalisar, lerEstrutura, escreverEstrutura, tipoDoEpisodio } from '../infantil/series.js';
 import { MIDIA_INFANTIL, ASPECTOS, PERCURSOS, TIPOS_MIDIA } from '../infantil/midia.js';
 import { assistir, obraInfantil } from '../views/assistir.js';
@@ -726,4 +727,63 @@ test('armazenamento: modos aparelho, pendente e nuvem; o código e a saída da f
   await arm.sairDaFamilia();
   assert.equal(arm.modo(), 'pendente');
   assert.equal(banco.familia.has('u2'), false);
+});
+
+test('mapa de habilidades: campos, pré-requisitos sem ciclo e em ordem, jogos e áreas que existem', () => {
+  const ids = HABILIDADES.map((h) => h.id);
+  assert.equal(new Set(ids).size, ids.length, 'ids únicos');
+  assert.equal(new Set(HABILIDADES.map((h) => h.nome.toLowerCase())).size, ids.length, 'nomes únicos (a ligação com o registro é pelo nome)');
+  for (const [i, h] of HABILIDADES.entries()) {
+    assert.ok(TRILHAS[h.trilha], `${h.id}: trilha`);
+    assert.ok(AREAS.includes(TRILHAS[h.trilha].area), `${h.id}: a área da trilha existe no registro`);
+    for (const campo of ['nome', 'objetivo', 'verificar', 'dominio', 'excelencia', 'intervencao']) assert.ok(h[campo]?.length >= 15, `${h.id}: ${campo}`);
+    assert.ok(h.nome.length <= 160, `${h.id}: o nome cabe no campo do registro`);
+    assert.ok(h.de <= h.ate && h.de >= TRILHAS[h.trilha].de && h.ate <= TRILHAS[h.trilha].ate, `${h.id}: idades dentro da trilha`);
+    for (const p of h.prereq) assert.ok(ids.indexOf(p) >= 0 && ids.indexOf(p) < i, `${h.id}: pré-requisito ${p} existe e vem antes (sem ciclo)`);
+    if (h.jogo) assert.ok(JOGOS[h.jogo], `${h.id}: jogo ${h.jogo}`);
+    assert.equal(habilidadeDoTexto(`  ${h.nome.toUpperCase()} `)?.id, h.id, 'acha pelo nome, sem diferenciar maiúsculas');
+  }
+  assert.equal(habilidadeDoTexto('Dizer os numeros ate 5 na ordem')?.id, 'mat-recitar-5', 'sem diferenciar acentos');
+  assert.equal(habilidadeDoTexto('cloak'), null, 'habilidade livre não entra no mapa');
+  assert.deepEqual(trilhasDaIdade(0), [], 'bebê: nenhuma trilha');
+  assert.deepEqual(trilhasDaIdade(2), ['mat-numero']);
+  assert.deepEqual(trilhasDaIdade(null), ['mat-numero'], 'sem nascimento informado, mostra');
+  assert.deepEqual(trilhasDaIdade(9), []);
+});
+
+test('mapa de habilidades: uma observação não basta; domínio libera a seguinte; ordem do que fazer agora', () => {
+  const DIA = 86400000;
+  const t0 = new Date('2026-11-02T12:00:00').getTime();
+  const r = (n, nome, situacao, extra = {}) => reg(n, { habilidade: nome, situacao, criadoEm: t0 + n * DIA, ...extra });
+  const nome = (id) => habilidadePorId(id).nome;
+  const recitar = habilidadePorId('mat-recitar-5');
+
+  assert.deepEqual(proximasHabilidades('mat-numero', []).map((l) => l.habilidade.id), ['mat-recitar-5'], 'sem registros, começa pela primeira; o resto está bloqueado');
+  let regs = [r(1, nome('mat-recitar-5'), 'dominado')];
+  assert.equal(estadoDaHabilidade(recitar, regs).estado, 'a-confirmar', 'visto num dia só');
+  assert.equal(mapaDaTrilha('mat-numero', regs).find((l) => l.habilidade.id === 'mat-um-a-um-3').liberada, false, 'a seguinte não libera antes da confirmação');
+  regs.push(reg(50, { habilidade: nome('mat-recitar-5'), situacao: 'dominado', criadoEm: t0 + DIA + 3600000 })); // de novo, no mesmo dia
+  assert.equal(estadoDaHabilidade(recitar, regs).estado, 'a-confirmar', 'duas vezes no mesmo dia continuam sendo um dia');
+  regs.push(r(3, nome('mat-recitar-5'), 'dominado'));
+  assert.equal(estadoDaHabilidade(recitar, regs).estado, 'dominada', 'dois dias diferentes');
+  assert.equal(estadoDaHabilidade(recitar, [r(1, nome('mat-recitar-5'), 'dominado', { origem: 'confirmado' })]).estado, 'dominada', 'nova verificação confirmada');
+  assert.equal(estadoDaHabilidade(recitar, [...regs, r(9, nome('mat-recitar-5'), 'revisar')]).estado, 'em-andamento', 'o registro mais recente manda: domínio pode ser perdido');
+
+  assert.deepEqual(proximasHabilidades('mat-numero', regs).map((l) => l.habilidade.id), ['mat-um-a-um-3', 'mat-recitar-10'], 'liberadas pelo domínio da primeira');
+  regs.push(r(4, nome('mat-recitar-10'), 'em-desenvolvimento'), r(5, nome('mat-um-a-um-3'), 'dominado'));
+  assert.deepEqual(proximasHabilidades('mat-numero', regs).map((l) => [l.habilidade.id, l.estado]), [['mat-um-a-um-3', 'a-confirmar'], ['mat-recitar-10', 'em-andamento']], 'confirmar vem antes de continuar');
+  regs.push(r(6, nome('mat-juntar-tirar-5'), 'parcial'));
+  const adiantada = proximasHabilidades('mat-numero', regs, 9).find((l) => l.habilidade.id === 'mat-juntar-tirar-5');
+  assert.ok(adiantada && !adiantada.liberada && adiantada.faltam.length, 'habilidade adiantada com registro aparece, com o que falta');
+  assert.ok(proximasHabilidades('mat-numero', regs).length <= 3, 'no máximo três de cada vez');
+
+  const todas = HABILIDADES.map((h, i) => r(20 + i, h.nome, 'dominado', { origem: 'confirmado' }));
+  assert.deepEqual(proximasHabilidades('mat-numero', todas), [], 'trilha concluída');
+});
+
+test('mapa de habilidades: o formulário sugere as habilidades do mapa e o painel tem onde mostrá-lo', () => {
+  const tela = aulaInfantil(null, AULAS_INFANTIL[0].data);
+  assert.match(tela, /list="inf-hab-lista"/);
+  for (const h of HABILIDADES) assert.ok(tela.includes(`value="${h.nome}"`), h.id);
+  assert.match(infantil(), /id="inf-habilidades"/);
 });
