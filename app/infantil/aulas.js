@@ -2,6 +2,25 @@
 // Cada aula tem dois PDFs; os caminhos são relativos a app/index.html.
 export const AULAS_INFANTIL = [
   {
+    "data": "2026-11-25",
+    "titulo": "A luz do Advento",
+    "tema": "Isaías 9,1-5 e Lucas 1,26-38",
+    "virtude": "Esperança",
+    "icone": "estrela",
+    "perfil": "menina",
+    "filho": "f1",
+    "para": "Filha 1",
+    "resumo": "O povo esperava a luz, Maria esperou Jesus, e nós esperamos o Natal. Menos por correspondência, ver de 1 a 4 sem contar, trilha de 1 a 10 de Nazaré a Belém, padrões, sílabas e rimas, luz e sombra, candle, light, four.",
+    "arquivos": {
+      "aluna": "infantil/aulas/2026-11-25/ACI_2026-11-25_ALUNA.pdf",
+      "responsavel": "infantil/aulas/2026-11-25/ACI_2026-11-25_RESPONSAVEL.pdf"
+    },
+    "paginas": {
+      "aluna": 16,
+      "responsavel": 19
+    }
+  },
+  {
     "data": "2026-11-12",
     "titulo": "O pastor conta as ovelhas",
     "tema": "Lucas 15,4-7 e João 10,11",
